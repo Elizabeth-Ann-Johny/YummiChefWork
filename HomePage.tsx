@@ -164,7 +164,7 @@ export default function HomePage() {
     fetchDishes();
   }, []);
 
-  const toggleFavorite = async (dishId: string) => {
+  const toggleFavorite = async (dishId: string): Promise<void> => {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) {
@@ -284,7 +284,7 @@ export default function HomePage() {
             <Text style={styles.priceText}>₹{item.price}</Text>
           </View>
           <TouchableOpacity
-            onPress={() => toggleFavorite(item.id)}
+            onPress={() => toggleFavorite(String(item.id))}
             style={styles.heartButton}
           >
             {item.isFavorite ? (
