@@ -135,15 +135,15 @@ export default function HomePage() {
         // Transform database snake_case to camelCase for TypeScript interface
         const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
           .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating) // Filter out incomplete records
-          .map(d => ({
-            id: d.id,
-            name: d.name!,
-            description: d.description!,
-            price: d.price!,
-            image: d.image!,
-            cookingTime: d.cooking_time!,
-            rating: d.rating!,
-            spiceLevel: d.spice_level || 0,
+          .map((d): Dish => ({
+            id: String(d.id),
+            name: String(d.name!),
+            description: String(d.description!),
+            price: Number(d.price!),
+            image: String(d.image!),
+            cookingTime: Number(d.cooking_time!),
+            rating: Number(d.rating!),
+            spiceLevel: d.spice_level ? Number(d.spice_level) : 0,
             serviceType: d.service_type || 'home-delivery',
             cuisine: d.cuisine || 'unknown',
             ingredients: d.ingredients || [],
