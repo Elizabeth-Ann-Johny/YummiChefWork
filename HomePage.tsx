@@ -164,7 +164,7 @@ export default function HomePage() {
     fetchDishes();
   }, []);
 
-  const toggleFavorite = async (dishId: string): Promise<void> => {
+  const handleToggleFavorite = async (dishId: string): Promise<void> => {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) {
@@ -260,7 +260,7 @@ export default function HomePage() {
 
   if (loading) return <Loading />;
 
- const DishCard = ({ item }: { item: Dish }) => (
+ const DishCard: React.FC<{ item: Dish }> = ({ item }) => (
   <TouchableOpacity 
     style={[styles.card, isGridView ? styles.gridCard : styles.listCard]}
     onPress={() =>openDishDetails(item)}
@@ -284,7 +284,10 @@ export default function HomePage() {
             <Text style={styles.priceText}>₹{item.price}</Text>
           </View>
           <TouchableOpacity
-            onPress={() => toggleFavorite(String(item.id))}
+            onPress={() => {
+              const dishId: string = String(item.id);
+              handleToggleFavorite(dishId);
+            }}
             style={styles.heartButton}
           >
             {item.isFavorite ? (
