@@ -20,14 +20,12 @@ import Loading from './loading';
 // Database response type (snake_case) - matches your actual Supabase schema
 type DatabaseDish = {
   id: string;                    // uuid in database
-  chef_id: string;               // uuid in database
   name: string | null;
   description: string | null;
   image: string | null;
   alergens: string | null;       // Note: typo in your schema but keeping it as is
   cooking_time: number | null;   // double precision in database
   price: number | null;          // numeric in database
-  created_at: string | null;
   rating: number | null;         // numeric in database
   spice_level: number | null;
   service_type: string | null;
@@ -39,7 +37,6 @@ type DatabaseDish = {
 // Frontend type (camelCase)
 type Dish = {
   id: string;                    // Changed to string to match uuid
-  chefId: string;
   name: string;
   description: string;
   price: number;
@@ -91,7 +88,21 @@ export default function HomePage() {
         console.log('Fetching dishes from Supabase...');
         const { data: dishesData, error: dishesError } = await supabase
           .from('dishes')
-          .select('*');
+          .select(`
+            id,
+            name,
+            description,
+            image,
+            alergens,
+            cooking_time,
+            price,
+            rating,
+            spice_level,
+            service_type,
+            cuisine,
+            ingredients,
+            dietary_type
+          `);
         
         console.log('Dishes query result:', { dishesData, dishesError });
         
@@ -126,7 +137,6 @@ export default function HomePage() {
           .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating) // Filter out incomplete records
           .map(d => ({
             id: d.id,
-            chefId: d.chef_id,
             name: d.name!,
             description: d.description!,
             price: d.price!,
