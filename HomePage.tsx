@@ -17,6 +17,23 @@ import { supabase } from '../../lib/supabase';
 import { theme } from '../../lib/theme';
 import Loading from './loading';
 
+// Database response type (snake_case)
+type DatabaseDish = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  cooking_time: number;
+  rating: number;
+  spice_level?: number;
+  service_type?: string;
+  cuisine?: string;
+  ingredients?: string[];
+  dietary_type?: string;
+};
+
+// Frontend type (camelCase)
 type Dish = {
   id: number;
   name: string;
@@ -65,32 +82,61 @@ export default function HomePage() {
   };
   useEffect(() => {
     const fetchDishes = async () => {
-      const { data: dishesData, error: dishesError } = await supabase.from('dishes').select('*');
-      const { data: userData } = await supabase.auth.getUser();
+      try {
+        const { data: dishesData, error: dishesError } = await supabase
+          .from('dishes')
+          .select('*');
+        
+        const { data: userData } = await supabase.auth.getUser();
 
-      if (dishesError) {
-        console.error('Error fetching dishes:', dishesError);
+        if (dishesError) {
+          console.error('Error fetching dishes:', dishesError);
+          Alert.alert('Error', 'Failed to load dishes. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        if (!dishesData) {
+          console.log('No dishes found');
+          setDishes([]);
+          setLoading(false);
+          return;
+        }
+
+        let favoriteIds: number[] = [];
+        if (userData?.user) {
+          const { data: favoritesData } = await supabase
+            .from('favorites')
+            .select('dish_id')
+            .eq('user_id', userData.user.id);
+
+          favoriteIds = favoritesData?.map(fav => fav.dish_id) || [];
+        }
+
+        // Transform database snake_case to camelCase for TypeScript interface
+        const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[]).map(d => ({
+          id: d.id,
+          name: d.name,
+          description: d.description,
+          price: d.price,
+          image: d.image,
+          cookingTime: d.cooking_time,
+          rating: d.rating,
+          spiceLevel: d.spice_level,
+          serviceType: d.service_type,
+          cuisine: d.cuisine,
+          ingredients: d.ingredients,
+          dietaryType: d.dietary_type,
+          isFavorite: favoriteIds.includes(d.id),
+        }));
+
+        setDishes(dishesWithFavorites);
         setLoading(false);
-        return;
+      } catch (error) {
+        console.error('Unexpected error fetching dishes:', error);
+        Alert.alert('Error', 'Something went wrong while loading dishes.');
+        setLoading(false);
       }
-
-      let favoriteIds = [];
-      if (userData?.user) {
-        const { data: favoritesData } = await supabase
-          .from('favorites')
-          .select('dish_id')
-          .eq('user_id', userData.user.id);
-
-        favoriteIds = favoritesData?.map(fav => fav.dish_id) || [];
-      }
-
-      const dishesWithFavorites = dishesData.map(d => ({
-        ...d,
-        isFavorite: favoriteIds.includes(d.id),
-      }));
-
-      setDishes(dishesWithFavorites);
-      setLoading(false);
     };
 
     fetchDishes();
