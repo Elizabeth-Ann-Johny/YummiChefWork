@@ -149,7 +149,7 @@ export default function HomePage() {
             ingredients: d.ingredients || [],
             dietaryType: d.dietary_type || 'vegetarian',
             allergens: d.alergens || '',
-            isFavorite: favoriteIds.includes(d.id),
+            isFavorite: favoriteIds.includes(String(d.id)),
           }));
 
         setDishes(dishesWithFavorites);
@@ -172,7 +172,7 @@ export default function HomePage() {
       return;
     }
 
-    const currentDish = dishes.find(d => d.id === dishId);
+    const currentDish = dishes.find((d: Dish) => String(d.id) === String(dishId));
     const isFavorite = currentDish?.isFavorite;
 
     if (isFavorite) {
@@ -203,8 +203,8 @@ export default function HomePage() {
 
     // Update local state only if database operation was successful
     setDishes(prev =>
-      prev.map(dish =>
-        dish.id === dishId ? { ...dish, isFavorite: !dish.isFavorite } : dish
+      prev.map((dish: Dish) =>
+        String(dish.id) === String(dishId) ? { ...dish, isFavorite: !dish.isFavorite } : dish
       )
     );
   } catch (error) {
