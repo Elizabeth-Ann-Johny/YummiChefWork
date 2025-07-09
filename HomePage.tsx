@@ -35,8 +35,8 @@ type DatabaseDish = {
 };
 
 // Frontend type (camelCase)
-type Dish = {
-  id: string;                    // Changed to string to match uuid
+interface Dish {
+  id: string;                    // UUID from database
   name: string;
   description: string;
   price: number;
@@ -48,9 +48,9 @@ type Dish = {
   cuisine?: string;
   ingredients?: string[];
   dietaryType?: string;
-  allergens?: string;            // Added allergens field
+  allergens?: string;
   isFavorite?: boolean;
-};
+}
 
 export default function HomePage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -135,22 +135,25 @@ export default function HomePage() {
         // Transform database snake_case to camelCase for TypeScript interface
         const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
           .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating) // Filter out incomplete records
-          .map((d): Dish => ({
-            id: String(d.id),
-            name: String(d.name!),
-            description: String(d.description!),
-            price: Number(d.price!),
-            image: String(d.image!),
-            cookingTime: Number(d.cooking_time!),
-            rating: Number(d.rating!),
-            spiceLevel: d.spice_level ? Number(d.spice_level) : 0,
-            serviceType: d.service_type || 'home-delivery',
-            cuisine: d.cuisine || 'unknown',
-            ingredients: d.ingredients || [],
-            dietaryType: d.dietary_type || 'vegetarian',
-            allergens: d.alergens || '',
-            isFavorite: favoriteIds.includes(String(d.id)),
-          }));
+          .map((d): Dish => {
+            const dish: Dish = {
+              id: d.id as string,
+              name: String(d.name!),
+              description: String(d.description!),
+              price: Number(d.price!),
+              image: String(d.image!),
+              cookingTime: Number(d.cooking_time!),
+              rating: Number(d.rating!),
+              spiceLevel: d.spice_level ? Number(d.spice_level) : 0,
+              serviceType: d.service_type || 'home-delivery',
+              cuisine: d.cuisine || 'unknown',
+              ingredients: d.ingredients || [],
+              dietaryType: d.dietary_type || 'vegetarian',
+              allergens: d.alergens || '',
+              isFavorite: favoriteIds.includes(String(d.id)),
+            };
+            return dish;
+          });
 
         setDishes(dishesWithFavorites);
         setLoading(false);
