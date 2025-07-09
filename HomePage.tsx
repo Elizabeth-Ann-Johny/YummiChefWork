@@ -266,84 +266,63 @@ export default function HomePage() {
  const DishCard: React.FC<{ item: Dish }> = ({ item }) => (
   <TouchableOpacity 
     style={[styles.card, isGridView ? styles.gridCard : styles.listCard]}
-    onPress={() =>openDishDetails(item)}
+    onPress={() => openDishDetails(item)}
   >
     <Image source={{ uri: item.image }} style={styles.cardImage} />
     
-    {/* Overlay Content */}
-    <View style={styles.cardOverlay}>
-      {/* Top Section */}
-      <View style={styles.topSection}>
-        {/* Service Type Tag */}
-        <View style={styles.serviceTag}>
-          <Text style={styles.serviceTagText}>
-            {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
-          </Text>
-        </View>
-        
-        {/* Price and Heart */}
-        <View style={styles.topRight}>
-          <View style={styles.priceTag}>
-            <Text style={styles.priceText}>₹{item.price}</Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              const dishId: string = String(item.id);
-              handleToggleFavorite(dishId);
-            }}
-            style={styles.heartButton}
-          >
-            {item.isFavorite ? (
-              <Text style={styles.heartIcon}>❤️</Text>
-            ) : (
-              <Text style={styles.heartIcon}>🤍</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+    {/* Heart Icon */}
+    <TouchableOpacity
+      onPress={() => {
+        const dishId: string = String(item.id);
+        handleToggleFavorite(dishId);
+      }}
+      style={styles.heartButton}
+    >
+      {item.isFavorite ? (
+        <Text style={styles.heartIcon}>❤️</Text>
+      ) : (
+        <Text style={styles.heartIcon}>🤍</Text>
+      )}
+    </TouchableOpacity>
+    
+    {/* Content Section */}
+    <View style={styles.cardContent}>
+      <Text style={styles.dishName} numberOfLines={1}>
+        {item.name}
+      </Text>
+      
+      {/* Service Type */}
+      <View style={styles.serviceTag}>
+        <Text style={styles.serviceTagText}>
+          {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
+        </Text>
       </View>
       
-      {/* Middle Section */}
-      <View style={styles.middleSection}>
-        <Text style={styles.dishName} numberOfLines={1}>
-          {item.name}
+      {/* Dietary Type */}
+      <View style={[
+        styles.dietaryTag,
+        { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#FF9800' }
+      ]}>
+        <Text style={styles.dietaryTagText}>
+          {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
         </Text>
-        
-        {/* Dietary Type */}
-        <View style={[
-          styles.dietaryTag,
-          { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#F44336' }
-        ]}>
-          <Text style={styles.dietaryTagText}>
-            {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
-          </Text>
-        </View>
-        
-        {/* Cuisine */}
-        <Text style={styles.cuisineText}>
-          {item.cuisine?.toUpperCase() || 'CUISINE'}
-        </Text>
-        
-        {/* Rating and Cooking Time */}
-        <View style={styles.metaInfo}>
-          <View style={styles.ratingContainer}>
-            <Text style={{ color: '#FFD700', fontSize: 14 }}>★</Text>
-            <Text style={styles.ratingText}>{item.rating}</Text>
-          </View>
-          <View style={styles.timeContainer}>
-            <MaterialIcons name="access-time" size={14} color="#fff" />
-            <Text style={styles.timeText}>{item.cookingTime}</Text>
-          </View>
-        </View>
       </View>
       
-      {/* Bottom Section - View Details Button */}
-      <View style={styles.bottomSection}>
-        <TouchableOpacity 
-          style={styles.viewDetailsButton}
-          onPress={() => openDishDetails(item)}
-        >
-          <Text style={styles.viewDetailsText}>View Details</Text>
-        </TouchableOpacity>
+      {/* Cuisine */}
+      <Text style={styles.cuisineText}>
+        {item.cuisine?.toUpperCase() || 'CUISINE'}
+      </Text>
+      
+      {/* Rating and Cooking Time */}
+      <View style={styles.metaInfo}>
+        <View style={styles.ratingContainer}>
+          <Text style={{ color: '#FFD700', fontSize: 14 }}>★</Text>
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+        <View style={styles.timeContainer}>
+          <MaterialIcons name="access-time" size={14} color="#666" />
+          <Text style={styles.timeText}>{item.cookingTime} min</Text>
+        </View>
       </View>
     </View>
   </TouchableOpacity>
@@ -716,40 +695,24 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 16,
     overflow: 'hidden',
-     boxShadow: '0px 2px 4px 12px rgba(0, 0, 0, 0.15)',
-    elevation: 4,
     flex: 1,
     margin: 5,
-    height: 280
+    height: 280,
+    position: 'relative',
   },
   gridCard: { maxWidth: '48%' },
   listCard: { width: '100%', height: 200, },
   cardImage: {
     width: '100%',
-    height: '100%',
-    position: 'absolute',
+    height: '60%',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
-  cardOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Dark overlay for text visibility
-    justifyContent: 'space-between',
+  cardContent: { 
     padding: 12,
-  },
-  topSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  middleSection: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
-  bottomSection: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  image: { width: '100%', height: 150 },
-  cardContent: { padding: 10 },
   
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
   meta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -771,59 +734,44 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
-    serviceTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  serviceTag: {
+    backgroundColor: '#E8F5E8',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   serviceTagText: {
-    fontSize: 12,
-    color: theme.COLORS.text,
+    fontSize: 11,
+    color: '#4CAF50',
     fontWeight: '600',
   },
-  topRight: {
-    alignItems: 'flex-end',
-  },
-  priceTag: {
-    backgroundColor: '#8B4513',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
-  priceText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
   heartButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 20,
     padding: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 1,
   },
   heartIcon: {
     fontSize: 16,
   },
   dishName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: theme.COLORS.text,
     marginBottom: 8,
   },
   dietaryTag: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     marginBottom: 8,
   },
   dietaryTagText: {
@@ -831,40 +779,25 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-  viewDetailsButton: {
-    backgroundColor: '#8B4513',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    alignItems: 'center',
-    minWidth: 120,
-  },
-  viewDetailsText: {
-    fontSize: 12,
-    color: 'white',
-    fontWeight: '600',
-  },
   cuisineText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#666',
     fontWeight: '600',
-    marginBottom: 4,
-    textAlign: 'center',
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   metaInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
+    justifyContent: 'space-between',
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
   },
   ratingText: {
     fontSize: 12,
-    color: 'white',
+    color: theme.COLORS.text,
     marginLeft: 2,
   },
   timeContainer: {
@@ -873,7 +806,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    color: 'white',
+    color: theme.COLORS.text,
     marginLeft: 4,
   },
 
