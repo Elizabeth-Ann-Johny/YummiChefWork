@@ -17,25 +17,29 @@ import { supabase } from '../../lib/supabase';
 import { theme } from '../../lib/theme';
 import Loading from './loading';
 
-// Database response type (snake_case)
+// Database response type (snake_case) - matches your actual Supabase schema
 type DatabaseDish = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  cooking_time: number;
-  rating: number;
-  spice_level?: number;
-  service_type?: string;
-  cuisine?: string;
-  ingredients?: string[];
-  dietary_type?: string;
+  id: string;                    // uuid in database
+  chef_id: string;               // uuid in database
+  name: string | null;
+  description: string | null;
+  image: string | null;
+  alergens: string | null;       // Note: typo in your schema but keeping it as is
+  cooking_time: number | null;   // double precision in database
+  price: number | null;          // numeric in database
+  created_at: string | null;
+  rating: number | null;         // numeric in database
+  spice_level: number | null;
+  service_type: string | null;
+  cuisine: string | null;
+  ingredients: string[] | null;
+  dietary_type: string | null;
 };
 
 // Frontend type (camelCase)
 type Dish = {
-  id: number;
+  id: string;                    // Changed to string to match uuid
+  chefId: string;
   name: string;
   description: string;
   price: number;
@@ -47,6 +51,7 @@ type Dish = {
   cuisine?: string;
   ingredients?: string[];
   dietaryType?: string;
+  allergens?: string;            // Added allergens field
   isFavorite?: boolean;
 };
 
@@ -83,9 +88,12 @@ export default function HomePage() {
   useEffect(() => {
     const fetchDishes = async () => {
       try {
+        console.log('Fetching dishes from Supabase...');
         const { data: dishesData, error: dishesError } = await supabase
           .from('dishes')
           .select('*');
+        
+        console.log('Dishes query result:', { dishesData, dishesError });
         
         const { data: userData } = await supabase.auth.getUser();
 
@@ -103,7 +111,7 @@ export default function HomePage() {
           return;
         }
 
-        let favoriteIds: number[] = [];
+        let favoriteIds: string[] = [];
         if (userData?.user) {
           const { data: favoritesData } = await supabase
             .from('favorites')
@@ -114,21 +122,25 @@ export default function HomePage() {
         }
 
         // Transform database snake_case to camelCase for TypeScript interface
-        const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[]).map(d => ({
-          id: d.id,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          image: d.image,
-          cookingTime: d.cooking_time,
-          rating: d.rating,
-          spiceLevel: d.spice_level,
-          serviceType: d.service_type,
-          cuisine: d.cuisine,
-          ingredients: d.ingredients,
-          dietaryType: d.dietary_type,
-          isFavorite: favoriteIds.includes(d.id),
-        }));
+        const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
+          .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating) // Filter out incomplete records
+          .map(d => ({
+            id: d.id,
+            chefId: d.chef_id,
+            name: d.name!,
+            description: d.description!,
+            price: d.price!,
+            image: d.image!,
+            cookingTime: d.cooking_time!,
+            rating: d.rating!,
+            spiceLevel: d.spice_level || 0,
+            serviceType: d.service_type || 'home-delivery',
+            cuisine: d.cuisine || 'unknown',
+            ingredients: d.ingredients || [],
+            dietaryType: d.dietary_type || 'vegetarian',
+            allergens: d.alergens || '',
+            isFavorite: favoriteIds.includes(d.id),
+          }));
 
         setDishes(dishesWithFavorites);
         setLoading(false);
@@ -142,7 +154,7 @@ export default function HomePage() {
     fetchDishes();
   }, []);
 
-  const toggleFavorite = async (dishId: number) => {
+  const toggleFavorite = async (dishId: string) => {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) {
@@ -515,7 +527,7 @@ const DishDetailsModal = () => {
       {/* Dishes List */}
       <FlatList
         data={processedDishes}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         numColumns={isGridView ? 2 : 1}
         contentContainerStyle={{ paddingHorizontal: 10 }}
         renderItem={({ item }) => <DishCard item={item} />}
