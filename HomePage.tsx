@@ -419,9 +419,15 @@ export default function HomePage() {
         <View style={styles.cardContentMain}>
           {/* Left side content */}
           <View style={styles.leftContent}>
-            <Text style={styles.dishName} numberOfLines={1}>
-              {item.name}
-            </Text>
+            {/* Dish Name and Price Row */}
+            <View style={styles.namePriceRow}>
+              <Text style={styles.dishName} numberOfLines={1}>
+                {item.name}
+              </Text>
+              <Text style={styles.priceText}>
+                ₹{item.price}
+              </Text>
+            </View>
 
             {/* Service Type and Rating Row */}
             <View style={styles.serviceRatingRow}>
@@ -452,15 +458,10 @@ export default function HomePage() {
               </View>
             </View>
 
-            {/* Cuisine and Price Row */}
-            <View style={styles.cuisinePriceRow}>
-              <Text style={styles.cuisineText}>
-                {item.cuisine?.toUpperCase() || 'CUISINE'}
-              </Text>
-              <Text style={styles.priceText}>
-                ₹{item.price}
-              </Text>
-            </View>
+            {/* Cuisine */}
+            <Text style={styles.cuisineText}>
+              {item.cuisine?.toUpperCase() || 'CUISINE'}
+            </Text>
           </View>
         </View>
       </View>
@@ -854,6 +855,12 @@ const styles = StyleSheet.create({
   leftContent: {
     flex: 1,
   },
+  namePriceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   serviceRatingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -865,11 +872,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  cuisinePriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
 
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
@@ -921,7 +923,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: theme.COLORS.text,
-    marginBottom: 8,
+    flex: 1,
+    paddingRight: 8,
   },
   dietaryTag: {
     paddingHorizontal: 8,
@@ -939,11 +942,16 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: '600',
     textTransform: 'uppercase',
+    marginTop: 4,
   },
   priceText: {
-    fontSize: 14,
+    fontSize: 16,
     color: theme.COLORS.primary,
     fontWeight: 'bold',
+    backgroundColor: theme.COLORS.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   ratingContainer: {
     flexDirection: 'row',
