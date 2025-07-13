@@ -47,10 +47,10 @@ type DatabaseReview = {
   comment: string;
   created_at: string;
   user_id: string;
-  dish_id: string;
+  dish_id?: string; // Optional since we don't select it when fetching for a specific dish
   USERS?: {
     name: string;
-  };
+  } | null;
 };
 
 interface Review {
@@ -130,7 +130,7 @@ export default function HomePage() {
           comment,
           created_at,
           user_id,
-          USERS (
+          USERS!inner (
             name
           )
         `)
@@ -142,7 +142,7 @@ export default function HomePage() {
         return;
       }
 
-      const formattedReviews: Review[] = (reviewsData as DatabaseReview[]).map(review => ({
+      const formattedReviews: Review[] = (reviewsData || []).map(review => ({
         id: review.id,
         rating: review.rating,
         comment: review.comment,
@@ -226,7 +226,7 @@ export default function HomePage() {
             comment,
             created_at,
             dish_id,
-            USERS (
+            USERS!inner (
               name
             )
           `)
