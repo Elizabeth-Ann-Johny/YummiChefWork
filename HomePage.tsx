@@ -50,7 +50,7 @@ type DatabaseReview = {
   dish_id?: string; // Optional since we don't select it when fetching for a specific dish
   USERS?: {
     name: string;
-  } | null;
+  }[] | null;
 };
 
 interface Review {
@@ -147,7 +147,7 @@ export default function HomePage() {
         rating: review.rating,
         comment: review.comment,
         created_at: review.created_at,
-        userName: review.USERS?.name || 'Anonymous',
+        userName: review.USERS?.[0]?.name || 'Anonymous',
       }));
 
       // Update the selected dish with the fetched reviews
@@ -244,7 +244,7 @@ export default function HomePage() {
               rating: latestReview.rating,
               comment: latestReview.comment,
               created_at: latestReview.created_at,
-              userName: latestReview.USERS?.name || 'Anonymous',
+              userName: latestReview.USERS?.[0]?.name || 'Anonymous',
             }] : [];
 
             const dish: Dish = {
