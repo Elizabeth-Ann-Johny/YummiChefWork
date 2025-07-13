@@ -252,61 +252,12 @@ export default function HomePage() {
           favoriteIds = favoritesData?.map(fav => fav.dish_id) || [];
         }
 
-        // Fetch latest review for each dish to show in the card
-        const dishIds = dishesData.map(d => d.id);
-        let { data: latestReviews } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            rating,
-            comment,
-            created_at,
-            dish_id,
-            USERS!inner (
-              name
-            )
-          `)
-          .in('dish_id', dishIds)
-          .order('created_at', { ascending: false });
-
-        // If foreign key relationship doesn't work, try manual join
-        if (!latestReviews) {
-          console.log('Foreign key relationship not found for latest reviews, trying manual join...');
-          
-          const { data: reviewsOnly } = await supabase
-            .from('reviews')
-            .select('*')
-            .in('dish_id', dishIds)
-            .order('created_at', { ascending: false });
-
-                     if (reviewsOnly) {
-             const userIds = [...new Set(reviewsOnly.map(r => r.user_id))];
-             const { data: usersData } = await supabase
-               .from('USERS')
-               .select('id, name')
-               .in('id', userIds);
-
-             latestReviews = reviewsOnly.map(review => ({
-               ...review,
-               USERS: usersData?.filter(user => user.id === review.user_id) || []
-             }));
-           }
-        }
+                // No need to fetch reviews for dish cards anymore
 
         // Transform database snake_case to camelCase for TypeScript interface
         const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
           .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating)
           .map((d): Dish => {
-            // Find the latest review for this dish
-            const latestReview = latestReviews?.find(r => r.dish_id === d.id);
-            const latestReviewFormatted: Review[] = latestReview ? [{
-              id: latestReview.id,
-              rating: latestReview.rating,
-              comment: latestReview.comment,
-              created_at: latestReview.created_at,
-              userName: latestReview.USERS?.[0]?.name || 'Anonymous',
-            }] : [];
-
             const dish: Dish = {
               id: d.id as string,
               name: String(d.name!),
@@ -320,15 +271,15 @@ export default function HomePage() {
               cuisine: d.cuisine || 'unknown',
               ingredients: d.ingredients || [],
               dietaryType: d.dietary_type || 'vegetarian',
-                             chef: d.CHEFS?.USERS
+                                            chef: d.CHEFS?.USERS
                  ? {
                      name: d.CHEFS.USERS.name,
                      average_rating: d.CHEFS.average_rating ?? 0,
                    }
                  : undefined,
-              reviews: latestReviewFormatted,
-              allergens: d.alergens || '',
-              isFavorite: favoriteIds.includes(String(d.id)),
+               reviews: [], // No reviews in dish cards
+               allergens: d.alergens || '',
+               isFavorite: favoriteIds.includes(String(d.id)),
             };
             return dish;
           });
@@ -468,12 +419,6 @@ export default function HomePage() {
         <Text style={styles.dishName} numberOfLines={1}>
           {item.name}
         </Text>
-
-        {item.reviews && item.reviews.length > 0 && (
-          <Text numberOfLines={2} style={styles.latestReview}>
-            "{item.reviews[0].comment}" — {item.reviews[0].userName}
-          </Text>
-        )}
 
         {/* Service Type */}
         <View style={styles.serviceTag}>
@@ -893,12 +838,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  latestReview: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    color: '#666',
-    marginBottom: 6,
-  },
+
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
   meta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   header: {
