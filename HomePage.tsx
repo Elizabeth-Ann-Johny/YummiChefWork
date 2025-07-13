@@ -414,20 +414,21 @@ export default function HomePage() {
         )}
       </TouchableOpacity>
 
+      {/* Price Tag */}
+      <View style={styles.priceTag}>
+        <Text style={styles.priceText}>
+          ₹{item.price}
+        </Text>
+      </View>
+
       {/* Content Section */}
       <View style={styles.cardContent}>
         <View style={styles.cardContentMain}>
           {/* Left side content */}
           <View style={styles.leftContent}>
-            {/* Dish Name and Price Row */}
-            <View style={styles.namePriceRow}>
-              <Text style={styles.dishName} numberOfLines={1}>
-                {item.name}
-              </Text>
-              <Text style={styles.priceText}>
-                ₹{item.price}
-              </Text>
-            </View>
+            <Text style={styles.dishName} numberOfLines={1}>
+              {item.name}
+            </Text>
 
             {/* Service Type and Rating Row */}
             <View style={styles.serviceRatingRow}>
@@ -855,12 +856,6 @@ const styles = StyleSheet.create({
   leftContent: {
     flex: 1,
   },
-  namePriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
   serviceRatingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -916,6 +911,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
+  priceTag: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: theme.COLORS.accent,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    zIndex: 1,
+  },
   heartIcon: {
     fontSize: 16,
   },
@@ -923,8 +928,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: theme.COLORS.text,
-    flex: 1,
-    paddingRight: 8,
+    marginBottom: 8,
   },
   dietaryTag: {
     paddingHorizontal: 8,
@@ -945,13 +949,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   priceText: {
-    fontSize: 13,
+    fontSize: 12,
     color: theme.COLORS.primary,
     fontWeight: 'bold',
-    backgroundColor: theme.COLORS.accent,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
   },
   ratingContainer: {
     flexDirection: 'row',
