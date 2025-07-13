@@ -452,10 +452,15 @@ export default function HomePage() {
               </View>
             </View>
 
-            {/* Cuisine */}
-            <Text style={styles.cuisineText}>
-              {item.cuisine?.toUpperCase() || 'CUISINE'}
-            </Text>
+            {/* Cuisine and Price Row */}
+            <View style={styles.cuisinePriceRow}>
+              <Text style={styles.cuisineText}>
+                {item.cuisine?.toUpperCase() || 'CUISINE'}
+              </Text>
+              <Text style={styles.priceText}>
+                ₹{item.price}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -861,6 +866,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  cuisinePriceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
 
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
   meta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -928,8 +938,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontWeight: '600',
-    marginBottom: 8,
     textTransform: 'uppercase',
+  },
+  priceText: {
+    fontSize: 14,
+    color: theme.COLORS.primary,
+    fontWeight: 'bold',
   },
   ratingContainer: {
     flexDirection: 'row',
