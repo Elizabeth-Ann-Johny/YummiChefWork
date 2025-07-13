@@ -416,41 +416,46 @@ export default function HomePage() {
 
       {/* Content Section */}
       <View style={styles.cardContent}>
-        <Text style={styles.dishName} numberOfLines={1}>
-          {item.name}
-        </Text>
+        <View style={styles.cardContentMain}>
+          {/* Left side content */}
+          <View style={styles.leftContent}>
+            <Text style={styles.dishName} numberOfLines={1}>
+              {item.name}
+            </Text>
 
-        {/* Service Type */}
-        <View style={styles.serviceTag}>
-          <Text style={styles.serviceTagText}>
-            {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
-          </Text>
-        </View>
+            {/* Service Type */}
+            <View style={styles.serviceTag}>
+              <Text style={styles.serviceTagText}>
+                {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
+              </Text>
+            </View>
 
-        {/* Dietary Type */}
-        <View style={[
-          styles.dietaryTag,
-          { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#FF9800' }
-        ]}>
-          <Text style={styles.dietaryTagText}>
-            {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
-          </Text>
-        </View>
+            {/* Dietary Type */}
+            <View style={[
+              styles.dietaryTag,
+              { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#FF9800' }
+            ]}>
+              <Text style={styles.dietaryTagText}>
+                {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
+              </Text>
+            </View>
 
-        {/* Cuisine */}
-        <Text style={styles.cuisineText}>
-          {item.cuisine?.toUpperCase() || 'CUISINE'}
-        </Text>
-
-        {/* Rating and Cooking Time */}
-        <View style={styles.metaInfo}>
-          <View style={styles.ratingContainer}>
-            <Text style={styles.starIcon}>⭐</Text>
-            <Text style={styles.ratingText}>{item.rating}</Text>
+            {/* Cuisine */}
+            <Text style={styles.cuisineText}>
+              {item.cuisine?.toUpperCase() || 'CUISINE'}
+            </Text>
           </View>
-          <View style={styles.timeContainer}>
-            <Text style={styles.clockIcon}>⏱️</Text>
-            <Text style={styles.timeText}>{item.cookingTime} min</Text>
+
+          {/* Right side content - Rating and Cooking Time */}
+          <View style={styles.rightContent}>
+            <View style={styles.ratingContainer}>
+              <Text style={styles.starIcon}>⭐</Text>
+              <Text style={styles.ratingText}>{item.rating}</Text>
+            </View>
+            <View style={styles.timeContainer}>
+              <Text style={styles.clockIcon}>⏱️</Text>
+              <Text style={styles.timeText}>{item.cookingTime} min</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -836,7 +841,21 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 12,
     flex: 1,
+  },
+  cardContentMain: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flex: 1,
+  },
+  leftContent: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  rightContent: {
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    minHeight: 60,
   },
 
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
@@ -910,14 +929,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: 'uppercase',
   },
-  metaInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 6,
   },
   starIcon: {
     fontSize: 14,
