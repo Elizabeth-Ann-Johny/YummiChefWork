@@ -945,13 +945,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 13,
     color: theme.COLORS.primary,
     fontWeight: 'bold',
     backgroundColor: theme.COLORS.accent,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   ratingContainer: {
     flexDirection: 'row',
