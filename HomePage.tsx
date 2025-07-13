@@ -445,11 +445,11 @@ export default function HomePage() {
         {/* Rating and Cooking Time */}
         <View style={styles.metaInfo}>
           <View style={styles.ratingContainer}>
-            <Text style={{ color: '#FFD700', fontSize: 14 }}>★</Text>
+            <Text style={styles.starIcon}>⭐</Text>
             <Text style={styles.ratingText}>{item.rating}</Text>
           </View>
           <View style={styles.timeContainer}>
-            <MaterialIcons name="access-time" size={14} color="#666" />
+            <Text style={styles.clockIcon}>⏱️</Text>
             <Text style={styles.timeText}>{item.cookingTime} min</Text>
           </View>
         </View>
@@ -919,19 +919,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  starIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
   ratingText: {
     fontSize: 12,
     color: theme.COLORS.text,
-    marginLeft: 2,
+    fontWeight: '600',
   },
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  clockIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
   timeText: {
     fontSize: 12,
     color: theme.COLORS.text,
-    marginLeft: 4,
+    fontWeight: '600',
   },
   searchIcon: {
     marginRight: 12,
