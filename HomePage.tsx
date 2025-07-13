@@ -423,39 +423,39 @@ export default function HomePage() {
               {item.name}
             </Text>
 
-            {/* Service Type */}
-            <View style={styles.serviceTag}>
-              <Text style={styles.serviceTagText}>
-                {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
-              </Text>
+            {/* Service Type and Rating Row */}
+            <View style={styles.serviceRatingRow}>
+              <View style={styles.serviceTag}>
+                <Text style={styles.serviceTagText}>
+                  {item.serviceType === 'chef-at-home' ? 'Chef at Home' : 'Home Delivery'}
+                </Text>
+              </View>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.starIcon}>⭐</Text>
+                <Text style={styles.ratingText}>{item.rating}</Text>
+              </View>
             </View>
 
-            {/* Dietary Type */}
-            <View style={[
-              styles.dietaryTag,
-              { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#FF9800' }
-            ]}>
-              <Text style={styles.dietaryTagText}>
-                {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
-              </Text>
+            {/* Dietary Type and Cooking Time Row */}
+            <View style={styles.dietaryTimeRow}>
+              <View style={[
+                styles.dietaryTag,
+                { backgroundColor: item.dietaryType === 'vegetarian' ? '#4CAF50' : '#FF9800' }
+              ]}>
+                <Text style={styles.dietaryTagText}>
+                  {item.dietaryType === 'vegetarian' ? 'vegetarian' : 'non-vegetarian'}
+                </Text>
+              </View>
+              <View style={styles.timeContainer}>
+                <Text style={styles.clockIcon}>⏱️</Text>
+                <Text style={styles.timeText}>{item.cookingTime} min</Text>
+              </View>
             </View>
 
             {/* Cuisine */}
             <Text style={styles.cuisineText}>
               {item.cuisine?.toUpperCase() || 'CUISINE'}
             </Text>
-          </View>
-
-          {/* Right side content - Rating and Cooking Time */}
-          <View style={styles.rightContent}>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.starIcon}>⭐</Text>
-              <Text style={styles.ratingText}>{item.rating}</Text>
-            </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.clockIcon}>⏱️</Text>
-              <Text style={styles.timeText}>{item.cookingTime} min</Text>
-            </View>
           </View>
         </View>
       </View>
@@ -841,21 +841,25 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 12,
     flex: 1,
+    justifyContent: 'space-between',
   },
   cardContentMain: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     flex: 1,
   },
   leftContent: {
     flex: 1,
-    paddingRight: 8,
   },
-  rightContent: {
-    alignItems: 'flex-end',
+  serviceRatingRow: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    minHeight: 60,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dietaryTimeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
 
   dishDesc: { fontSize: 12, color: '#666', marginVertical: 5 },
@@ -882,7 +886,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    marginBottom: 8,
     alignSelf: 'flex-start',
   },
   serviceTagText: {
@@ -915,7 +918,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     alignSelf: 'flex-start',
-    marginBottom: 8,
   },
   dietaryTagText: {
     fontSize: 10,
@@ -932,7 +934,6 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
   },
   starIcon: {
     fontSize: 14,
