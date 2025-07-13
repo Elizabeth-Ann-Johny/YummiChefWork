@@ -33,9 +33,9 @@ type DatabaseDish = {
   ingredients: string[] | null;
   dietary_type: string | null;
   chef_id?: string | null;
-  CHEFS?: {
+  chefs?: {
     average_rating?: number;
-    USERS?: {
+    users?: {
       name: string;
     };
   };
@@ -48,7 +48,7 @@ type DatabaseReview = {
   created_at: string;
   user_id: string;
   dish_id?: string; // Optional since we don't select it when fetching for a specific dish
-  USERS?: {
+  users?: {
     name: string;
   }[] | null;
 };
@@ -122,7 +122,8 @@ export default function HomePage() {
   const fetchDishReviews = async (dishId: string) => {
     setLoadingReviews(true);
     try {
-      const { data: reviewsData, error } = await supabase
+      // Try with foreign key relationship first
+      let { data: reviewsData, error } = await supabase
         .from('reviews')
         .select(`
           id,
@@ -130,14 +131,49 @@ export default function HomePage() {
           comment,
           created_at,
           user_id,
-          USERS!inner (
+          users!inner (
             name
           )
         `)
         .eq('dish_id', dishId)
         .order('created_at', { ascending: false });
 
-      if (error) {
+      // If foreign key relationship doesn't work, try manual join
+      if (error && error.code === 'PGRST200') {
+        console.log('Foreign key relationship not found, trying manual join...');
+        
+        // First get reviews
+        const { data: reviewsOnly, error: reviewsError } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('dish_id', dishId)
+          .order('created_at', { ascending: false });
+
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          return;
+        }
+
+        // Get unique user IDs
+        const userIds = [...new Set(reviewsOnly?.map(r => r.user_id) || [])];
+        
+        // Get user names
+        const { data: usersData, error: usersError } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', userIds);
+
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          return;
+        }
+
+        // Combine the data
+        reviewsData = reviewsOnly?.map(review => ({
+          ...review,
+          users: usersData?.filter(user => user.id === review.user_id) || []
+        })) || [];
+      } else if (error) {
         console.error('Error fetching reviews:', error);
         return;
       }
@@ -147,7 +183,7 @@ export default function HomePage() {
         rating: review.rating,
         comment: review.comment,
         created_at: review.created_at,
-        userName: review.USERS?.[0]?.name || 'Anonymous',
+        userName: review.users?.[0]?.name || 'Anonymous',
       }));
 
       // Update the selected dish with the fetched reviews
@@ -180,9 +216,9 @@ export default function HomePage() {
             ingredients,
             dietary_type,
             chef_id,
-            CHEFS (
+            chefs (
               average_rating,
-              USERS (
+              users (
                 name
               )
             )
@@ -218,7 +254,7 @@ export default function HomePage() {
 
         // Fetch latest review for each dish to show in the card
         const dishIds = dishesData.map(d => d.id);
-        const { data: latestReviews } = await supabase
+        let { data: latestReviews } = await supabase
           .from('reviews')
           .select(`
             id,
@@ -226,12 +262,36 @@ export default function HomePage() {
             comment,
             created_at,
             dish_id,
-            USERS!inner (
+            users!inner (
               name
             )
           `)
           .in('dish_id', dishIds)
           .order('created_at', { ascending: false });
+
+        // If foreign key relationship doesn't work, try manual join
+        if (!latestReviews) {
+          console.log('Foreign key relationship not found for latest reviews, trying manual join...');
+          
+          const { data: reviewsOnly } = await supabase
+            .from('reviews')
+            .select('*')
+            .in('dish_id', dishIds)
+            .order('created_at', { ascending: false });
+
+          if (reviewsOnly) {
+            const userIds = [...new Set(reviewsOnly.map(r => r.user_id))];
+            const { data: usersData } = await supabase
+              .from('users')
+              .select('id, name')
+              .in('id', userIds);
+
+            latestReviews = reviewsOnly.map(review => ({
+              ...review,
+              users: usersData?.filter(user => user.id === review.user_id) || []
+            }));
+          }
+        }
 
         // Transform database snake_case to camelCase for TypeScript interface
         const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
@@ -244,7 +304,7 @@ export default function HomePage() {
               rating: latestReview.rating,
               comment: latestReview.comment,
               created_at: latestReview.created_at,
-              userName: latestReview.USERS?.[0]?.name || 'Anonymous',
+              userName: latestReview.users?.[0]?.name || 'Anonymous',
             }] : [];
 
             const dish: Dish = {
@@ -260,12 +320,12 @@ export default function HomePage() {
               cuisine: d.cuisine || 'unknown',
               ingredients: d.ingredients || [],
               dietaryType: d.dietary_type || 'vegetarian',
-              chef: d.CHEFS?.USERS
-                ? {
-                    name: d.CHEFS.USERS.name,
-                    average_rating: d.CHEFS.average_rating ?? 0,
-                  }
-                : undefined,
+                             chef: d.chefs?.users
+                 ? {
+                     name: d.chefs.users.name,
+                     average_rating: d.chefs.average_rating ?? 0,
+                   }
+                 : undefined,
               reviews: latestReviewFormatted,
               allergens: d.alergens || '',
               isFavorite: favoriteIds.includes(String(d.id)),
