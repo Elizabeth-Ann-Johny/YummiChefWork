@@ -397,28 +397,31 @@ export default function HomePage() {
       style={[styles.card, isGridView ? styles.gridCard : styles.listCard]}
       onPress={() => openDishDetails(item)}
     >
-      <Image source={{ uri: item.image }} style={styles.cardImage} />
+      {/* Image Container with Overlays */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.image }} style={styles.cardImage} />
 
-      {/* Heart Icon */}
-      <TouchableOpacity
-        onPress={() => {
-          const dishId: string = String(item.id);
-          handleToggleFavorite(dishId);
-        }}
-        style={styles.heartButton}
-      >
-        {item.isFavorite ? (
-          <Text style={styles.heartIcon}>❤️</Text>
-        ) : (
-          <Text style={styles.heartIcon}>🤍</Text>
-        )}
-      </TouchableOpacity>
+        {/* Heart Icon */}
+        <TouchableOpacity
+          onPress={() => {
+            const dishId: string = String(item.id);
+            handleToggleFavorite(dishId);
+          }}
+          style={styles.heartButton}
+        >
+          {item.isFavorite ? (
+            <Text style={styles.heartIcon}>❤️</Text>
+          ) : (
+            <Text style={styles.heartIcon}>🤍</Text>
+          )}
+        </TouchableOpacity>
 
-      {/* Price Tag */}
-      <View style={styles.priceTag}>
-        <Text style={styles.priceText}>
-          ₹{item.price}
-        </Text>
+        {/* Price Tag */}
+        <View style={styles.priceTag}>
+          <Text style={styles.priceText}>
+            ₹{item.price}
+          </Text>
+        </View>
       </View>
 
       {/* Content Section */}
@@ -839,11 +842,17 @@ const styles = StyleSheet.create({
   },
   gridCard: { maxWidth: '48%' },
   listCard: { width: '100%', height: 200 },
-  cardImage: {
+  imageContainer: {
     width: '100%',
     height: '60%',
+    position: 'relative',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    overflow: 'hidden',
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
   },
   cardContent: {
     padding: 12,
