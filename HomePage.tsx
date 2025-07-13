@@ -33,9 +33,9 @@ type DatabaseDish = {
   ingredients: string[] | null;
   dietary_type: string | null;
   chef_id?: string | null;
-  chefs?: {
+  CHEFS?: {
     average_rating?: number;
-    users?: {
+    USERS?: {
       name: string;
     };
   };
@@ -48,7 +48,7 @@ type DatabaseReview = {
   created_at: string;
   user_id: string;
   dish_id?: string; // Optional since we don't select it when fetching for a specific dish
-  users?: {
+  USERS?: {
     name: string;
   }[] | null;
 };
@@ -123,20 +123,20 @@ export default function HomePage() {
     setLoadingReviews(true);
     try {
       // Try with foreign key relationship first
-      let { data: reviewsData, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          rating,
-          comment,
-          created_at,
-          user_id,
-          users!inner (
-            name
-          )
-        `)
-        .eq('dish_id', dishId)
-        .order('created_at', { ascending: false });
+              let { data: reviewsData, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            rating,
+            comment,
+            created_at,
+            user_id,
+            USERS!inner (
+              name
+            )
+          `)
+          .eq('dish_id', dishId)
+          .order('created_at', { ascending: false });
 
       // If foreign key relationship doesn't work, try manual join
       if (error && error.code === 'PGRST200') {
@@ -157,22 +157,22 @@ export default function HomePage() {
         // Get unique user IDs
         const userIds = [...new Set(reviewsOnly?.map(r => r.user_id) || [])];
         
-        // Get user names
-        const { data: usersData, error: usersError } = await supabase
-          .from('users')
-          .select('id, name')
-          .in('id', userIds);
+                 // Get user names
+         const { data: usersData, error: usersError } = await supabase
+           .from('USERS')
+           .select('id, name')
+           .in('id', userIds);
 
         if (usersError) {
           console.error('Error fetching users:', usersError);
           return;
         }
 
-        // Combine the data
-        reviewsData = reviewsOnly?.map(review => ({
-          ...review,
-          users: usersData?.filter(user => user.id === review.user_id) || []
-        })) || [];
+                 // Combine the data
+         reviewsData = reviewsOnly?.map(review => ({
+           ...review,
+           USERS: usersData?.filter(user => user.id === review.user_id) || []
+         })) || [];
       } else if (error) {
         console.error('Error fetching reviews:', error);
         return;
@@ -183,7 +183,7 @@ export default function HomePage() {
         rating: review.rating,
         comment: review.comment,
         created_at: review.created_at,
-        userName: review.users?.[0]?.name || 'Anonymous',
+        userName: review.USERS?.[0]?.name || 'Anonymous',
       }));
 
       // Update the selected dish with the fetched reviews
@@ -216,9 +216,9 @@ export default function HomePage() {
             ingredients,
             dietary_type,
             chef_id,
-            chefs (
+            CHEFS (
               average_rating,
-              users (
+              USERS (
                 name
               )
             )
@@ -262,7 +262,7 @@ export default function HomePage() {
             comment,
             created_at,
             dish_id,
-            users!inner (
+            USERS!inner (
               name
             )
           `)
@@ -279,18 +279,18 @@ export default function HomePage() {
             .in('dish_id', dishIds)
             .order('created_at', { ascending: false });
 
-          if (reviewsOnly) {
-            const userIds = [...new Set(reviewsOnly.map(r => r.user_id))];
-            const { data: usersData } = await supabase
-              .from('users')
-              .select('id, name')
-              .in('id', userIds);
+                     if (reviewsOnly) {
+             const userIds = [...new Set(reviewsOnly.map(r => r.user_id))];
+             const { data: usersData } = await supabase
+               .from('USERS')
+               .select('id, name')
+               .in('id', userIds);
 
-            latestReviews = reviewsOnly.map(review => ({
-              ...review,
-              users: usersData?.filter(user => user.id === review.user_id) || []
-            }));
-          }
+             latestReviews = reviewsOnly.map(review => ({
+               ...review,
+               USERS: usersData?.filter(user => user.id === review.user_id) || []
+             }));
+           }
         }
 
         // Transform database snake_case to camelCase for TypeScript interface
@@ -304,7 +304,7 @@ export default function HomePage() {
               rating: latestReview.rating,
               comment: latestReview.comment,
               created_at: latestReview.created_at,
-              userName: latestReview.users?.[0]?.name || 'Anonymous',
+              userName: latestReview.USERS?.[0]?.name || 'Anonymous',
             }] : [];
 
             const dish: Dish = {
@@ -320,10 +320,10 @@ export default function HomePage() {
               cuisine: d.cuisine || 'unknown',
               ingredients: d.ingredients || [],
               dietaryType: d.dietary_type || 'vegetarian',
-                             chef: d.chefs?.users
+                             chef: d.CHEFS?.USERS
                  ? {
-                     name: d.chefs.users.name,
-                     average_rating: d.chefs.average_rating ?? 0,
+                     name: d.CHEFS.USERS.name,
+                     average_rating: d.CHEFS.average_rating ?? 0,
                    }
                  : undefined,
               reviews: latestReviewFormatted,
