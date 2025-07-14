@@ -81,7 +81,7 @@ export default function Favorites() {
 
       // Transform the data to match our Dish type
       const dishesWithFavorites: Dish[] = favoritesData?.map(fav => {
-        const dish = fav.dishes;
+        const dish = Array.isArray(fav.dishes) ? fav.dishes[0] : fav.dishes;
         if (!dish) return null;
         
         return {
