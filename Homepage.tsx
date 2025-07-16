@@ -13,10 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { theme } from '../../lib/theme';
 import Loading from './loading';
-import { useFavorites } from '../../FavoritesContext';
 
 // Database response type (snake_case) - matches your actual Supabase schema
 type DatabaseDish = {
@@ -101,9 +101,6 @@ export default function HomePage() {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
-
-  // Use the favorites context
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
   const [filters, setFilters] = useState({
     cuisine: '',
@@ -200,92 +197,107 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    const fetchDishes = async () => {
-      try {
-        console.log('Fetching dishes from Supabase...');
-        const { data: dishesData, error: dishesError } = await supabase
-          .from('dishes')
-          .select(`
-            id,
-            name,
-            description,
-            image,
-            alergens,
-            cooking_time,
-            price,
-            rating,
-            spice_level,
-            service_type,
-            cuisine,
-            ingredients,
-            dietary_type,
-            chef_id,
-            CHEFS (
-              average_rating,
-              USERS (
-                name
-              )
+  // Refresh dishes when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDishes();
+    }, [])
+  );
+
+  const fetchDishes = async () => {
+    try {
+      console.log('Fetching dishes from Supabase...');
+      const { data: dishesData, error: dishesError } = await supabase
+        .from('dishes')
+        .select(`
+          id,
+          name,
+          description,
+          image,
+          alergens,
+          cooking_time,
+          price,
+          rating,
+          spice_level,
+          service_type,
+          cuisine,
+          ingredients,
+          dietary_type,
+          chef_id,
+          CHEFS (
+            average_rating,
+            USERS (
+              name
             )
-          `);
+          )
+        `);
 
-        console.log('Dishes query result:', { dishesData, dishesError });
+      console.log('Dishes query result:', { dishesData, dishesError });
 
-        if (dishesError) {
-          console.error('Error fetching dishes:', dishesError);
-          Alert.alert('Error', 'Failed to load dishes. Please try again.');
-          setLoading(false);
-          return;
-        }
+      const { data: userData } = await supabase.auth.getUser();
 
-        if (!dishesData) {
-          console.log('No dishes found');
-          setDishes([]);
-          setLoading(false);
-          return;
-        }
-
-        // Transform database snake_case to camelCase for TypeScript interface
-        const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
-          .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating)
-          .map((d): Dish => {
-            const dish: Dish = {
-              id: d.id as string,
-              name: String(d.name!),
-              description: String(d.description!),
-              price: Number(d.price!),
-              image: String(d.image!),
-              cookingTime: Number(d.cooking_time!),
-              rating: Number(d.rating!),
-              spiceLevel: d.spice_level ? Number(d.spice_level) : 0,
-              serviceType: d.service_type || 'home-delivery',
-              cuisine: d.cuisine || 'unknown',
-              ingredients: d.ingredients || [],
-              dietaryType: d.dietary_type || 'vegetarian',
-              chef: d.CHEFS?.USERS
-                ? {
-                    name: d.CHEFS.USERS.name,
-                    average_rating: d.CHEFS.average_rating ?? 0,
-                  }
-                : undefined,
-              reviews: [], // No reviews in dish cards
-              allergens: d.alergens || '',
-              isFavorite: isFavorite(String(d.id)), // Use context here
-            };
-            return dish;
-          });
-
-        setDishes(dishesWithFavorites);
+      if (dishesError) {
+        console.error('Error fetching dishes:', dishesError);
+        Alert.alert('Error', 'Failed to load dishes. Please try again.');
         setLoading(false);
-      } catch (error) {
-        console.error('Unexpected error fetching dishes:', error);
-        Alert.alert('Error', 'Something went wrong while loading dishes.');
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchDishes();
-  }, [isFavorite]); // Re-fetch when favorites context changes
+      if (!dishesData) {
+        console.log('No dishes found');
+        setDishes([]);
+        setLoading(false);
+        return;
+      }
+
+      let favoriteIds: string[] = [];
+      if (userData?.user) {
+        const { data: favoritesData } = await supabase
+          .from('favorites')
+          .select('dish_id')
+          .eq('user_id', userData.user.id);
+
+        favoriteIds = favoritesData?.map(fav => fav.dish_id) || [];
+      }
+
+      // Transform database snake_case to camelCase for TypeScript interface
+      const dishesWithFavorites: Dish[] = (dishesData as DatabaseDish[])
+        .filter(d => d.name && d.description && d.price && d.image && d.cooking_time && d.rating)
+        .map((d): Dish => {
+          const dish: Dish = {
+            id: d.id as string,
+            name: String(d.name!),
+            description: String(d.description!),
+            price: Number(d.price!),
+            image: String(d.image!),
+            cookingTime: Number(d.cooking_time!),
+            rating: Number(d.rating!),
+            spiceLevel: d.spice_level ? Number(d.spice_level) : 0,
+            serviceType: d.service_type || 'home-delivery',
+            cuisine: d.cuisine || 'unknown',
+            ingredients: d.ingredients || [],
+            dietaryType: d.dietary_type || 'vegetarian',
+            chef: d.CHEFS?.USERS
+              ? {
+                  name: d.CHEFS.USERS.name,
+                  average_rating: d.CHEFS.average_rating ?? 0,
+                }
+              : undefined,
+            reviews: [], // No reviews in dish cards
+            allergens: d.alergens || '',
+            isFavorite: favoriteIds.includes(String(d.id)),
+          };
+          return dish;
+        });
+
+      setDishes(dishesWithFavorites);
+      setLoading(false);
+    } catch (error) {
+      console.error('Unexpected error fetching dishes:', error);
+      Alert.alert('Error', 'Something went wrong while loading dishes.');
+      setLoading(false);
+    }
+  };
 
   const handleToggleFavorite = async (dishId: string): Promise<void> => {
     try {
@@ -295,18 +307,39 @@ export default function HomePage() {
         return;
       }
 
-      const currentlyFavorite = isFavorite(dishId);
+      const currentDish = dishes.find((d: Dish) => String(d.id) === String(dishId));
+      const isFavorite = currentDish?.isFavorite;
 
-      if (currentlyFavorite) {
-        await removeFavorite(dishId);
+      if (isFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', userData.user.id)
+          .eq('dish_id', dishId);
+
+        if (error) {
+          console.error('Error removing favorite:', error);
+          Alert.alert('Error', 'Failed to remove from favorites');
+          return;
+        }
       } else {
-        await addFavorite(dishId);
+        // Add to favorites
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ user_id: userData.user.id, dish_id: dishId });
+
+        if (error) {
+          console.error('Error adding favorite:', error);
+          Alert.alert('Error', 'Failed to add to favorites');
+          return;
+        }
       }
 
-      // Update local dishes state to reflect the change immediately
+      // Update local state only if database operation was successful
       setDishes(prev =>
         prev.map((dish: Dish) =>
-          String(dish.id) === String(dishId) ? { ...dish, isFavorite: !currentlyFavorite } : dish
+          String(dish.id) === String(dishId) ? { ...dish, isFavorite: !dish.isFavorite } : dish
         )
       );
     } catch (error) {
@@ -380,7 +413,7 @@ export default function HomePage() {
           }}
           style={styles.heartButton}
         >
-          {isFavorite(String(item.id)) ? (
+          {item.isFavorite ? (
             <Text style={styles.heartIcon}>❤️</Text>
           ) : (
             <Text style={styles.heartIcon}>🤍</Text>

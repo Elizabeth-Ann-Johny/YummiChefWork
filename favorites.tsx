@@ -12,9 +12,9 @@ import {
   View,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../../lib/supabase';
 import { theme } from '../../../lib/theme';
-import { useFavorites } from '../../../FavoritesContext';
 
 type Dish = {
   id: string;
@@ -54,11 +54,13 @@ export default function Favorites() {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
-  const { favoriteIds, removeFavorite: removeFromFavorites } = useFavorites();
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [favoriteIds]); // Watch for changes in favoriteIds
+  // Refresh favorites when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchFavorites();
+    }, [])
+  );
 
   const fetchFavorites = async () => {
     try {
@@ -70,42 +72,41 @@ export default function Favorites() {
 
       setUser(userData.user);
 
-      // If no favorites in context, set empty array
-      if (!favoriteIds || favoriteIds.length === 0) {
-        setFavorites([]);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch dish details for favorite IDs from context
-      const { data: dishesData, error } = await supabase
-        .from('dishes')
+      // Fetch user's favorites with dish details
+      const { data: favoritesData, error } = await supabase
+        .from('favorites')
         .select(`
-          id,
-          name,
-          description,
-          price,
-          image,
-          cooking_time,
-          rating,
-          spice_level,
-          service_type,
-          cuisine,
-          ingredients,
-          dietary_type,
-          alergens
+          dish_id,
+          dishes (
+            id,
+            name,
+            description,
+            price,
+            image,
+            cooking_time,
+            rating,
+            spice_level,
+            service_type,
+            cuisine,
+            ingredients,
+            dietary_type,
+            alergens
+          )
         `)
-        .in('id', favoriteIds);
+        .eq('user_id', userData.user.id);
 
       if (error) {
-        console.error('Error fetching dishes:', error);
+        console.error('Error fetching favorites:', error);
         Alert.alert('Error', 'Failed to load favorites');
         setLoading(false);
         return;
       }
 
       // Transform the data to match our Dish type
-      const dishesWithFavorites: Dish[] = dishesData?.map(dish => {
+      const dishesWithFavorites: Dish[] = favoritesData?.map(fav => {
+        const dish = Array.isArray(fav.dishes) ? fav.dishes[0] : fav.dishes;
+        if (!dish) return null;
+        
         return {
           id: dish.id,
           name: dish.name,
@@ -122,7 +123,7 @@ export default function Favorites() {
           allergens: dish.alergens || '',
           isFavorite: true,
         };
-      }) || [];
+      }).filter(dish => dish !== null) || [];
 
       setFavorites(dishesWithFavorites);
       setLoading(false);
@@ -134,12 +135,26 @@ export default function Favorites() {
   };
 
   const removeFavorite = async (dishId: string) => {
+    if (!user) return;
+
     try {
-      await removeFromFavorites(dishId);
-      // Local state will be updated automatically when favoriteIds changes
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('dish_id', dishId);
+
+      if (error) {
+        console.error('Error removing favorite:', error);
+        Alert.alert('Error', 'Failed to remove favorite');
+        return;
+      }
+
+      // Update local state
+      setFavorites(prev => prev.filter(dish => dish.id !== dishId));
     } catch (error) {
       console.error('Error removing favorite:', error);
-      Alert.alert('Error', 'Failed to remove favorite');
+      Alert.alert('Error', 'Something went wrong');
     }
   };
 
