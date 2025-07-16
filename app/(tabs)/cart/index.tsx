@@ -18,7 +18,7 @@ import { theme } from '../../../lib/theme';
 export default function Cart() {
   const {
     cartItems,
-    loading,
+    loading: cartLoading,
     removeFromCart,
     updateQuantity,
     getFoodCost,
@@ -79,7 +79,7 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.quantityButton}
           onPress={() => updateQuantity(item.id, item.quantity - 1)}
-          disabled={loading}
+          disabled={cartLoading}
         >
           <MaterialIcons name="remove" size={20} color={theme.COLORS.text} />
         </TouchableOpacity>
@@ -87,13 +87,22 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.quantityButton}
           onPress={() => updateQuantity(item.id, item.quantity + 1)}
-          disabled={loading}
+          disabled={cartLoading}
         >
           <MaterialIcons name="add" size={20} color={theme.COLORS.text} />
         </TouchableOpacity>
       </View>
     </View>
   );
+
+  if (cartLoading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <ActivityIndicator size="large" color={theme.COLORS.accent} />
+        <Text style={styles.emptyTitle}>Loading Cart...</Text>
+      </View>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -181,9 +190,9 @@ export default function Cart() {
                 isTipConfirmed && styles.tipButtonConfirmed
               ]}
               onPress={handleAddTip}
-              disabled={isTipConfirmed || loading}
+              disabled={isTipConfirmed || cartLoading}
             >
-              {loading ? (
+              {cartLoading ? (
                 <ActivityIndicator size="small" color={theme.COLORS.text} />
               ) : (
                 <MaterialIcons 
@@ -200,7 +209,7 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.checkoutButton}
           onPress={handlePlaceOrder}
-          disabled={loading || cartItems.length === 0}
+          disabled={loading || cartLoading || cartItems.length === 0}
         >
           {loading ? (
             <ActivityIndicator size="small" color={theme.COLORS.primary} />
