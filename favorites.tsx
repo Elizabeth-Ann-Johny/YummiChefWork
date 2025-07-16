@@ -14,6 +14,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabase';
 import { theme } from '../../../lib/theme';
+import { useFavorites } from '../../../FavoritesContext';
 
 type Dish = {
   id: string;
@@ -53,10 +54,11 @@ export default function Favorites() {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const { favoriteIds, removeFavorite: removeFromFavorites } = useFavorites();
 
   useEffect(() => {
     fetchFavorites();
-  }, []);
+  }, [favoriteIds]); // Watch for changes in favoriteIds
 
   const fetchFavorites = async () => {
     try {
@@ -68,41 +70,42 @@ export default function Favorites() {
 
       setUser(userData.user);
 
-      // Fetch user's favorites with dish details
-      const { data: favoritesData, error } = await supabase
-        .from('favorites')
+      // If no favorites in context, set empty array
+      if (!favoriteIds || favoriteIds.length === 0) {
+        setFavorites([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch dish details for favorite IDs from context
+      const { data: dishesData, error } = await supabase
+        .from('dishes')
         .select(`
-          dish_id,
-          dishes (
-            id,
-            name,
-            description,
-            price,
-            image,
-            cooking_time,
-            rating,
-            spice_level,
-            service_type,
-            cuisine,
-            ingredients,
-            dietary_type,
-            alergens
-          )
+          id,
+          name,
+          description,
+          price,
+          image,
+          cooking_time,
+          rating,
+          spice_level,
+          service_type,
+          cuisine,
+          ingredients,
+          dietary_type,
+          alergens
         `)
-        .eq('user_id', userData.user.id);
+        .in('id', favoriteIds);
 
       if (error) {
-        console.error('Error fetching favorites:', error);
+        console.error('Error fetching dishes:', error);
         Alert.alert('Error', 'Failed to load favorites');
         setLoading(false);
         return;
       }
 
       // Transform the data to match our Dish type
-      const dishesWithFavorites: Dish[] = favoritesData?.map(fav => {
-        const dish = Array.isArray(fav.dishes) ? fav.dishes[0] : fav.dishes;
-        if (!dish) return null;
-        
+      const dishesWithFavorites: Dish[] = dishesData?.map(dish => {
         return {
           id: dish.id,
           name: dish.name,
@@ -119,7 +122,7 @@ export default function Favorites() {
           allergens: dish.alergens || '',
           isFavorite: true,
         };
-      }).filter(dish => dish !== null) || [];
+      }) || [];
 
       setFavorites(dishesWithFavorites);
       setLoading(false);
@@ -131,26 +134,12 @@ export default function Favorites() {
   };
 
   const removeFavorite = async (dishId: string) => {
-    if (!user) return;
-
     try {
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('dish_id', dishId);
-
-      if (error) {
-        console.error('Error removing favorite:', error);
-        Alert.alert('Error', 'Failed to remove favorite');
-        return;
-      }
-
-      // Update local state
-      setFavorites(prev => prev.filter(dish => dish.id !== dishId));
+      await removeFromFavorites(dishId);
+      // Local state will be updated automatically when favoriteIds changes
     } catch (error) {
       console.error('Error removing favorite:', error);
-      Alert.alert('Error', 'Something went wrong');
+      Alert.alert('Error', 'Failed to remove favorite');
     }
   };
 
