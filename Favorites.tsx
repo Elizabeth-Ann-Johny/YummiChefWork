@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from './lib/supabase';
+import { theme } from './lib/theme';
 import { sharedStyles, favoritesStyles } from './sharedStyles';
 
 type Dish = {
@@ -388,7 +389,7 @@ export default function Favorites() {
             <ScrollView style={sharedStyles.detailsModalContent} showsVerticalScrollIndicator={false}>
               {/* Close Button */}
               <TouchableOpacity onPress={closeDishDetails} style={sharedStyles.detailsCloseButton}>
-                <MaterialIcons name="close" size={24} color="#333" />
+                <MaterialIcons name="close" size={24} color={theme.COLORS.text} />
               </TouchableOpacity>
 
               {/* Dish Image */}
@@ -523,7 +524,7 @@ export default function Favorites() {
   if (loading) {
     return (
       <View style={sharedStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FF6B6B" />
+        <ActivityIndicator size="large" color={theme.COLORS.accent} />
         <Text style={sharedStyles.loadingText}>Loading favorites...</Text>
       </View>
     );

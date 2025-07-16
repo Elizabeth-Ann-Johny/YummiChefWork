@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { supabase } from './lib/supabase';
+import { theme } from './lib/theme';
 import { sharedStyles, homePageStyles } from './sharedStyles';
 import Loading from './loading';
 
@@ -533,7 +534,7 @@ export default function HomePage() {
             <ScrollView style={sharedStyles.detailsModalContent} showsVerticalScrollIndicator={false}>
               {/* Close Button */}
               <TouchableOpacity onPress={closeDishDetails} style={sharedStyles.detailsCloseButton}>
-                <MaterialIcons name="close" size={24} color="#333" />
+                <MaterialIcons name="close" size={24} color={theme.COLORS.text} />
               </TouchableOpacity>
 
               {/* Dish Image */}
@@ -666,11 +667,11 @@ export default function HomePage() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={{ flex: 1, backgroundColor: theme.COLORS.background }}>
       {/* Header */}
       <View style={homePageStyles.header}>
-        <Text style={{ fontSize: 28, fontWeight: '700', color: '#333' }}>YummiChef</Text>
-        <Text style={{ fontSize: 14, fontWeight: '400', color: '#333' }}>
+        <Text style={{ fontSize: 28, fontWeight: '700', color: theme.COLORS.text }}>YummiChef</Text>
+        <Text style={{ fontSize: 14, fontWeight: '400', color: theme.COLORS.text }}>
           Authentic home-cooked meals✨
         </Text>
       </View>
@@ -718,13 +719,13 @@ export default function HomePage() {
                   setSortModalVisible(false);
                 }}
                 style={{
-                  backgroundColor: sortBy === option ? '#FF6B6B' : '#f5f5f5',
+                  backgroundColor: sortBy === option ? theme.COLORS.accent : theme.COLORS.gray,
                   padding: 10,
                   borderRadius: 8,
                   marginBottom: 10,
                 }}
               >
-                <Text style={{ color: sortBy === option ? '#fff' : '#333' }}>
+                <Text style={{ color: sortBy === option ? theme.COLORS.primary : theme.COLORS.text }}>
                   {option === 'cookingTime' ? 'Cooking Time' :
                     option === 'spiceLevel' ? 'Spice Level' :
                       option.charAt(0).toUpperCase()  + option.slice(1)}
@@ -759,13 +760,13 @@ export default function HomePage() {
                   key={type}
                   onPress={() => setFilters({ ...filters, dietaryType: type })}
                   style={{
-                    backgroundColor: filters.dietaryType === type ? '#FF6B6B' : '#f5f5f5',
+                    backgroundColor: filters.dietaryType === type ? theme.COLORS.accent : theme.COLORS.gray,
                     padding: 8,
                     borderRadius: 6,
                     marginBottom: 8,
                   }}
                 >
-                  <Text style={{ color: filters.dietaryType === type ? '#fff' : '#333' }}>
+                  <Text style={{ color: filters.dietaryType === type ? theme.COLORS.primary : theme.COLORS.text }}>
                     {type.charAt(0).toUpperCase() +  type.slice(1)}
                   </Text>
                 </TouchableOpacity>
@@ -779,8 +780,8 @@ export default function HomePage() {
                 step={50}
                 value={filters.maxPrice}
                 onValueChange={(value) => setFilters({ ...filters, maxPrice: value })}
-                minimumTrackTintColor="#FF6B6B"
-                maximumTrackTintColor="#f5f5f5"
+                minimumTrackTintColor={theme.COLORS.accent}
+                maximumTrackTintColor={theme.COLORS.gray}
               />
 
               {/* Cooking Time */}
@@ -791,8 +792,8 @@ export default function HomePage() {
                 step={5}
                 value={filters.maxCookingTime}
                 onValueChange={(value) => setFilters({ ...filters, maxCookingTime: value })}
-                minimumTrackTintColor="#FF6B6B"
-                maximumTrackTintColor="#f5f5f5"
+                minimumTrackTintColor={theme.COLORS.accent}
+                maximumTrackTintColor={theme.COLORS.gray}
               />
 
               {/* Cuisine */}
@@ -820,13 +821,13 @@ export default function HomePage() {
                   key={type}
                   onPress={() => setFilters({ ...filters, serviceType: type })}
                   style={{
-                    backgroundColor: filters.serviceType === type ? '#FF6B6B' : '#f5f5f5',
+                    backgroundColor: filters.serviceType === type ? theme.COLORS.accent : theme.COLORS.gray,
                     padding: 8,
                     borderRadius: 6,
                     marginBottom: 8,
                   }}
                 >
-                  <Text style={{ color: filters.serviceType === type ? '#fff' : '#333' }}>
+                  <Text style={{ color: filters.serviceType === type ? theme.COLORS.primary : theme.COLORS.text }}>
                     {type === 'home-delivery' ? 'Home-Cooked Delivery' : 'Chef at Home'}
                   </Text>
                 </TouchableOpacity>

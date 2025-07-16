@@ -1,16 +1,16 @@
 import { StyleSheet } from 'react-native';
 
-// Define theme colors inline to avoid path issues
+// Using your theme colors - matches your theme.ts file
 const theme = {
   COLORS: {
-    primary: '#333',
-    accent: '#FF6B6B',
-    background: '#f5f5f5',
-    white: '#fff',
-    text: '#333',
-    gray: '#e0e0e0',
-    border: '#e0e0e0',
-    overlay: 'rgba(0, 0, 0, 0.5)',
+    primary: '#FFF3DC',    // cream/beige
+    accent: '#482E1D',     // dark brown
+    background: '#FFF3DC', // cream/beige
+    text: '#482E1D',       // dark brown
+    white: '#FFFFFF',      // white
+    gray: '#E0E0E0',       // light gray
+    border: '#ccc',        // border color
+    overlay: '#00000099',  // overlay
   },
 };
 
@@ -21,7 +21,11 @@ export const sharedStyles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 16,
     overflow: 'hidden',
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     flex: 1,
     margin: 5,
     height: 300,
@@ -159,7 +163,7 @@ export const sharedStyles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontWeight: '600',
-    textTransform: 'uppercase',
+    textTransform: 'uppercase' as const,
     marginBottom: 5,
   },
   spiceLevel: {
@@ -432,8 +436,11 @@ export const homePageStyles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 15,
     height: 50,
-    boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
-    elevation: 1,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   searchIcon: {
     marginRight: 12,
@@ -445,7 +452,6 @@ export const homePageStyles = StyleSheet.create({
     fontSize: 16,
     color: theme.COLORS.text,
     borderWidth: 0,
-    outline: 'none',
   },
   controlsRow: {
     flexDirection: 'row',
