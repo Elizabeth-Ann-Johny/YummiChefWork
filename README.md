@@ -23,9 +23,9 @@
 - **Address Form**: Complete delivery address collection with validation
 - **Order Confirmation**: Final order placement with cart clearing
 
-## 🏗️ Architecture
+## 🏗️ Your Updated Architecture
 
-### CartContext (`contexts/CartContext.tsx`)
+### CartContext (`app/contexts/CartContext.tsx`)
 ```typescript
 - addToCart(dish) - Add items to cart
 - removeFromCart(itemId) - Remove items
@@ -38,13 +38,54 @@
 - clearCart() - Empty cart after order
 ```
 
-### Components Structure
+### Your Expo Router Structure
 ```
-App.tsx (CartProvider wrapper)
-├── Homepage.tsx (Browse & Add to Cart)
-├── Cart.tsx (Cart Management & Checkout)
-└── DeliveryAddress.tsx (Order Confirmation)
+app/
+├── (tabs)/
+│   ├── home/
+│   │   └── index.tsx → Updated to use Homepage
+│   ├── cart/                    🆕 NEW
+│   │   └── index.tsx → Cart Screen
+│   ├── favorites/
+│   │   └── index.tsx → Existing
+│   ├── profile/
+│   │   └── index.tsx → Existing
+│   └── _layout.tsx → Updated with CartProvider
+├── contexts/                    🆕 NEW
+│   └── CartContext.tsx → Cart State Management
+├── delivery-address/            🆕 NEW
+│   └── index.tsx → Delivery Address Screen
+├── home/
+│   ├── Homepage.tsx → Updated with cart integration
+│   └── loading.tsx → Loading component
+└── lib/
+    ├── supabase.ts → Your existing file
+    └── theme.ts → Your existing file
 ```
+
+## 📝 Summary of Changes
+
+### 🆕 New Files Created
+1. **`app/contexts/CartContext.tsx`** - Cart state management with Context API
+2. **`app/(tabs)/cart/index.tsx`** - Cart screen with bill summary and tip functionality
+3. **`app/delivery-address/index.tsx`** - Delivery address form and order confirmation
+4. **`app/home/Homepage.tsx`** - Updated homepage with cart integration
+5. **`app/home/loading.tsx`** - Loading component
+
+### 🔄 Modified Files
+1. **`app/(tabs)/_layout.tsx`** - Added CartProvider wrapper and cart tab with badge
+2. **`app/(tabs)/home/index.tsx`** - Updated to use new Homepage component
+3. **`package.json`** - Updated dependencies for Expo Router
+4. **`README.md`** - Updated with implementation details
+
+### 🎁 Key Features Added
+- **Cart Badge**: Shows item count on cart tab
+- **Real-time Updates**: Cart updates instantly across all screens
+- **Tax Calculation**: Automatic 3% tax calculation
+- **Tip System**: Manual tip input with confirmation
+- **Order Flow**: Complete checkout to delivery address
+- **Form Validation**: Address form with proper validation
+- **Loading States**: Visual feedback during operations
 
 ## 📱 User Flow
 
