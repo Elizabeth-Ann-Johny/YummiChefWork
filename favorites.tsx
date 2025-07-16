@@ -41,6 +41,11 @@ interface Review {
   userName: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 export default function Favorites() {
   const [favorites, setFavorites] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,8 +192,8 @@ export default function Favorites() {
       const userIds = [...new Set(reviewsData.map(r => r.user_id))];
       
       // Get user names - try both 'USERS' and 'users' table names
-      let usersData;
-      let usersError;
+      let usersData: User[] | null = null;
+      let usersError: any = null;
       
       // Try with 'USERS' first
       const { data: usersDataCaps, error: usersErrorCaps } = await supabase
@@ -203,10 +208,10 @@ export default function Favorites() {
           .select('id, name')
           .in('id', userIds);
         
-        usersData = usersDataLower;
+        usersData = usersDataLower as User[] | null;
         usersError = usersErrorLower;
       } else {
-        usersData = usersDataCaps;
+        usersData = usersDataCaps as User[] | null;
         usersError = usersErrorCaps;
       }
 
@@ -222,7 +227,7 @@ export default function Favorites() {
         rating: review.rating,
         comment: review.comment,
         created_at: review.created_at,
-        userName: usersData?.find(user => user.id === review.user_id)?.name || 'Anonymous',
+        userName: usersData?.find((user: User) => user.id === review.user_id)?.name || 'Anonymous',
       }));
 
       // Update the selected dish with the fetched reviews
