@@ -54,7 +54,7 @@ export default function Cart() {
     setTimeout(() => {
       setLoading(false);
       // Navigate to delivery address screen
-      router.push('/delivery-address' as any);
+      router.push('/delivery-address/index');
     }, 1000);
   };
 
@@ -100,7 +100,7 @@ export default function Cart() {
         <Text style={styles.emptyMessage}>
           Add some delicious dishes to your cart and they'll appear here!
         </Text>
-        <Link href="/(tabs)/home" asChild>
+        <Link href="/(tabs)/home/index" asChild>
           <TouchableOpacity style={styles.shopButton}>
             <Text style={styles.shopButtonText}>Start Shopping</Text>
           </TouchableOpacity>
