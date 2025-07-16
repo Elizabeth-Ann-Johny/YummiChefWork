@@ -31,6 +31,7 @@ export default function Cart() {
   const [tipInput, setTipInput] = useState('');
   const [isTipConfirmed, setIsTipConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDeliveryButton, setShowDeliveryButton] = useState(false);
 
   const handleAddTip = () => {
     const tipValue = parseFloat(tipInput);
@@ -53,8 +54,8 @@ export default function Cart() {
     // Simulate order processing
     setTimeout(() => {
       setLoading(false);
-      // Navigate to delivery address screen
-      router.push('/delivery-address/index' as any);
+      // Set flag to show Link component
+      setShowDeliveryButton(true);
     }, 1000);
   };
 
@@ -189,17 +190,25 @@ export default function Cart() {
         </View>
 
         {/* Place Order Button */}
-        <TouchableOpacity 
-          style={styles.checkoutButton}
-          onPress={handlePlaceOrder}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color={theme.COLORS.primary} />
-          ) : (
-            <Text style={styles.checkoutText}>Place Order</Text>
-          )}
-        </TouchableOpacity>
+        {showDeliveryButton ? (
+          <Link href="/delivery-address/index" asChild>
+            <TouchableOpacity style={styles.checkoutButton}>
+              <Text style={styles.checkoutText}>Continue to Delivery</Text>
+            </TouchableOpacity>
+          </Link>
+        ) : (
+          <TouchableOpacity 
+            style={styles.checkoutButton}
+            onPress={handlePlaceOrder}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={theme.COLORS.primary} />
+            ) : (
+              <Text style={styles.checkoutText}>Place Order</Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
