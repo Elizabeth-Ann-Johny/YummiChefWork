@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
 export type CartItem = {
-  id: string;
+  id: number;
   dishId: string;
   name: string;
   description: string;
@@ -12,14 +12,16 @@ export type CartItem = {
   quantity: number;
   cookingTime: number;
   rating: number;
+  restaurantId?: string;
+  categoryId?: string;
 };
 
 type CartContextType = {
   cartItems: CartItem[];
   loading: boolean;
   addToCart: (dish: any) => Promise<void>;
-  removeFromCart: (itemId: string) => Promise<void>;
-  updateQuantity: (itemId: string, newQuantity: number) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
+  updateQuantity: (itemId: number, newQuantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   getFoodCost: () => number;
   getTaxAmount: () => number;
@@ -63,7 +65,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('cart_items')
+        .from('cart_with_dishes')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
@@ -83,6 +85,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         quantity: item.quantity,
         cookingTime: item.cooking_time,
         rating: item.rating,
+        restaurantId: item.restaurant_id,
+        categoryId: item.category_id,
       }));
 
       setCartItems(formattedItems);
@@ -122,49 +126,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setLoading(true);
     try {
-      // Check if item already exists
-      const existingItem = cartItems.find(item => item.dishId === dish.id);
-      
-      if (existingItem) {
-        // Update quantity
-        await updateQuantity(existingItem.id, existingItem.quantity + 1);
-      } else {
-        // Add new item
-        const { data, error } = await supabase
-          .from('cart_items')
-          .insert([{
-            user_id: user.id,
-            dish_id: dish.id,
-            name: dish.name,
-            description: dish.description,
-            price: dish.price,
-            image: dish.image,
-            quantity: 1,
-            cooking_time: dish.cookingTime,
-            rating: dish.rating,
-          }])
-          .select()
-          .single();
+      // Use the add_to_cart function for upsert functionality
+      const { data, error } = await supabase
+        .rpc('add_to_cart', {
+          p_user_id: user.id,
+          p_dish_id: dish.id,
+          p_quantity: 1
+        });
 
-        if (error) {
-          console.error('Error adding to cart:', error);
-          return;
-        }
-
-        const newItem: CartItem = {
-          id: data.id,
-          dishId: data.dish_id,
-          name: data.name,
-          description: data.description,
-          price: data.price,
-          image: data.image,
-          quantity: data.quantity,
-          cookingTime: data.cooking_time,
-          rating: data.rating,
-        };
-
-        setCartItems(prev => [...prev, newItem]);
+      if (error) {
+        console.error('Error adding to cart:', error);
+        return;
       }
+
+      // Refresh cart data from the database
+      await syncCart();
     } catch (error) {
       console.error('Error adding to cart:', error);
     } finally {
@@ -172,13 +148,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const removeFromCart = async (itemId: string) => {
+  const removeFromCart = async (itemId: number) => {
     if (!user) return;
 
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('cart_items')
+        .from('cart')
         .delete()
         .eq('id', itemId)
         .eq('user_id', user.id);
@@ -196,7 +172,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
+  const updateQuantity = async (itemId: number, newQuantity: number) => {
     if (!user) return;
 
     if (newQuantity === 0) {
@@ -207,7 +183,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('cart_items')
+        .from('cart')
         .update({ quantity: newQuantity })
         .eq('id', itemId)
         .eq('user_id', user.id);
@@ -235,7 +211,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('cart_items')
+        .from('cart')
         .delete()
         .eq('user_id', user.id);
 

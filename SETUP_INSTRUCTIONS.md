@@ -40,13 +40,21 @@ The app uses the following tables:
 - Stores user profile information
 - Automatically created when a user signs up
 
-#### `cart_items`
-- Stores user-specific cart items
+#### `cart`
+- Stores user-specific cart items (normalized)
 - Links to user via `user_id`
+- References dishes via `dish_id` (foreign key to dishes table)
+- Unique constraint on (user_id, dish_id) to prevent duplicates
+- Includes `cart_with_dishes` view for easy querying with dish details
 
 #### `user_settings`
 - Stores user preferences like tip amount
 - One record per user
+
+#### `favorites`
+- Stores user's favorite dishes
+- Links to user via `user_id`
+- References dishes via `dish_id` (foreign key to dishes table)
 
 ### 4. Authentication Flow
 
@@ -129,16 +137,16 @@ yarn start
 ### 10. Development Notes
 
 #### Adding New Cart Operations
-All cart operations are async and database-backed:
+All cart operations are async and database-backed with normalized structure:
 
 ```typescript
-// Add to cart
+// Add to cart (uses upsert function)
 await addToCart(dish);
 
-// Update quantity
+// Update quantity (itemId is now number, not string)
 await updateQuantity(itemId, newQuantity);
 
-// Remove from cart
+// Remove from cart (itemId is now number, not string)
 await removeFromCart(itemId);
 
 // Clear cart
@@ -147,6 +155,13 @@ await clearCart();
 // Set tip amount
 await setTipAmount(amount);
 ```
+
+#### Database Structure Changes
+- **Cart table is now normalized** - only stores `user_id`, `dish_id`, and `quantity`
+- **Dish details are fetched via join** - uses `cart_with_dishes` view
+- **Automatic upsert functionality** - adding same dish increases quantity
+- **Unique constraint** - prevents duplicate cart entries for same user/dish
+- **Better performance** - with proper indexes and normalized structure
 
 #### Error Handling
 - Database errors are logged to console

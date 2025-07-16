@@ -44,48 +44,68 @@ export type Database = {
           updated_at?: string;
         };
       };
-      cart_items: {
+      cart: {
         Row: {
-          id: string;
+          id: number;
           user_id: string;
           dish_id: string;
-          name: string;
-          description: string;
-          price: number;
-          image: string;
           quantity: number;
-          cooking_time: number;
-          rating: number;
           created_at: string;
           updated_at: string;
         };
         Insert: {
-          id?: string;
+          id?: number;
           user_id: string;
           dish_id: string;
-          name: string;
-          description: string;
-          price: number;
-          image: string;
-          quantity: number;
-          cooking_time: number;
-          rating: number;
+          quantity?: number;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
-          id?: string;
+          id?: number;
           user_id?: string;
           dish_id?: string;
-          name?: string;
-          description?: string;
-          price?: number;
-          image?: string;
           quantity?: number;
-          cooking_time?: number;
-          rating?: number;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      cart_with_dishes: {
+        Row: {
+          id: number;
+          user_id: string;
+          dish_id: string;
+          quantity: number;
+          created_at: string;
+          updated_at: string;
+          name: string;
+          description: string;
+          price: number;
+          image: string;
+          cooking_time: number;
+          rating: number;
+          restaurant_id: string;
+          category_id: string;
+        };
+      };
+      favorites: {
+        Row: {
+          id: number;
+          user_id: string;
+          dish_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: string;
+          dish_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: string;
+          dish_id?: string;
+          created_at?: string;
         };
       };
       user_settings: {
