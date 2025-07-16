@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { theme } from '../../lib/theme';
 
 export default function TabsLayout() {
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: '#FF6B6B',
+      tabBarActiveTintColor: theme.COLORS.accent,
       tabBarInactiveTintColor: '#666',
       headerShown: false,
     }}>

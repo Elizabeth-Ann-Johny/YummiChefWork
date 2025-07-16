@@ -3,18 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
-
-const theme = {
-  COLORS: {
-    primary: '#FFFFFF',
-    background: '#F5F5F5',
-    accent: '#FF6B6B',
-    text: '#333333',
-    white: '#FFFFFF',
-    gray: '#E0E0E0',
-    border: '#DDDDDD',
-  }
-};
+import { theme } from '../../../lib/theme';
 
 export default function Profile() {
   const { clearCart, getItemCount } = useCart();

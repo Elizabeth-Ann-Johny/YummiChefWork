@@ -3,18 +3,7 @@ import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { CartProvider } from '../contexts/CartContext';
-
-const theme = {
-  COLORS: {
-    primary: '#FFFFFF',
-    background: '#F5F5F5',
-    accent: '#FF6B6B',
-    text: '#333333',
-    white: '#FFFFFF',
-    gray: '#E0E0E0',
-    border: '#DDDDDD',
-  }
-};
+import { theme } from '../lib/theme';
 
 function RootLayoutNav() {
   const { user, loading } = useAuth();

@@ -14,18 +14,7 @@ import {
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-
-const theme = {
-  COLORS: {
-    primary: '#FFFFFF',
-    background: '#F5F5F5',
-    accent: '#FF6B6B',
-    text: '#333333',
-    white: '#FFFFFF',
-    gray: '#E0E0E0',
-    border: '#DDDDDD',
-  }
-};
+import { theme } from '../../lib/theme';
 
 export default function SignUp() {
   const [fullName, setFullName] = useState('');
@@ -164,7 +153,7 @@ export default function SignUp() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color={theme.COLORS.white} />
+              <ActivityIndicator size="small" color={theme.COLORS.primary} />
             ) : (
               <Text style={styles.signupButtonText}>Create Account</Text>
             )}
@@ -255,7 +244,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   signupButtonText: {
-    color: theme.COLORS.white,
+    color: theme.COLORS.primary,
     fontSize: 16,
     fontWeight: 'bold',
   },

@@ -27,6 +27,11 @@ yarn install
    - Replace `YOUR_SUPABASE_URL` with your project URL
    - Replace `YOUR_SUPABASE_ANON_KEY` with your anon key
 
+4. **Theme Configuration**
+   - The app uses a custom theme located at `lib/theme.ts`
+   - Colors: Warm beige (#FFF3DC) and dark brown (#482E1D) color scheme
+   - Fonts: Custom font styles for headings and labels
+
 ### 3. Database Schema
 
 The app uses the following tables:

@@ -2,18 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const theme = {
-  COLORS: {
-    primary: '#FFFFFF',
-    background: '#F5F5F5',
-    accent: '#FF6B6B',
-    text: '#333333',
-    white: '#FFFFFF',
-    gray: '#E0E0E0',
-    border: '#DDDDDD',
-  }
-};
+import { theme } from '../lib/theme';
 
 export default function DeliveryAddress() {
   return (

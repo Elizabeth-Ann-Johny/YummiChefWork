@@ -13,19 +13,7 @@ import {
   View
 } from 'react-native';
 import { useCart } from '../../../contexts/CartContext';
-
-// You'll need to create this theme file or replace with your theme import
-const theme = {
-  COLORS: {
-    primary: '#FFFFFF',
-    background: '#F5F5F5',
-    accent: '#FF6B6B',
-    text: '#333333',
-    white: '#FFFFFF',
-    gray: '#E0E0E0',
-    border: '#DDDDDD',
-  }
-};
+import { theme } from '../../../lib/theme';
 
 export default function Cart() {
   const {
