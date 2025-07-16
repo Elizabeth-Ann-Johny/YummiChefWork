@@ -80,9 +80,7 @@ SELECT
     d.price,
     d.image,
     d.cooking_time,
-    d.rating,
-    d.restaurant_id,
-    d.category_id
+    d.rating
 FROM public.cart c
 JOIN public.dishes d ON c.dish_id = d.id;
 

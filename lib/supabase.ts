@@ -84,8 +84,6 @@ export type Database = {
           image: string;
           cooking_time: number;
           rating: number;
-          restaurant_id: string;
-          category_id: string;
         };
       };
       favorites: {

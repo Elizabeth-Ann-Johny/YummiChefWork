@@ -12,8 +12,6 @@ export type CartItem = {
   quantity: number;
   cookingTime: number;
   rating: number;
-  restaurantId?: string;
-  categoryId?: string;
 };
 
 type CartContextType = {
@@ -85,8 +83,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         quantity: item.quantity,
         cookingTime: item.cooking_time,
         rating: item.rating,
-        restaurantId: item.restaurant_id,
-        categoryId: item.category_id,
       }));
 
       setCartItems(formattedItems);
