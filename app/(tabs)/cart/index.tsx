@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Link } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -54,7 +54,7 @@ export default function Cart() {
     setTimeout(() => {
       setLoading(false);
       // Navigate to delivery address screen
-      router.push('/delivery-address');
+      router.push('/delivery-address' as any);
     }, 1000);
   };
 
@@ -100,12 +100,11 @@ export default function Cart() {
         <Text style={styles.emptyMessage}>
           Add some delicious dishes to your cart and they'll appear here!
         </Text>
-        <TouchableOpacity 
-          style={styles.shopButton}
-          onPress={() => router.push('/(tabs)/home')}
-        >
-          <Text style={styles.shopButtonText}>Start Shopping</Text>
-        </TouchableOpacity>
+        <Link href="/(tabs)/home" asChild>
+          <TouchableOpacity style={styles.shopButton}>
+            <Text style={styles.shopButtonText}>Start Shopping</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
     );
   }

@@ -73,7 +73,7 @@ export default function DeliveryAddress() {
             text: 'OK',
             onPress: () => {
               clearCart();
-              router.push('/(tabs)/home');
+              router.push('/(tabs)/home/');
             }
           }
         ]
