@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, Link } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -54,7 +54,7 @@ export default function Cart() {
     setTimeout(() => {
       setLoading(false);
       // Navigate to delivery address screen
-      router.push('/delivery-address/index');
+      router.push('/delivery-address/index' as any);
     }, 1000);
   };
 
