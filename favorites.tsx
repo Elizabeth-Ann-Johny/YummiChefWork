@@ -165,68 +165,64 @@ export default function Favorites() {
   const fetchDishReviews = async (dishId: string) => {
     setLoadingReviews(true);
     try {
-      // Try with foreign key relationship first
-      let { data: reviewsData, error } = await supabase
+      // First get reviews
+      const { data: reviewsData, error: reviewsError } = await supabase
         .from('reviews')
-        .select(`
-          id,
-          rating,
-          comment,
-          created_at,
-          user_id,
-          USERS!inner (
-            name
-          )
-        `)
+        .select('*')
         .eq('dish_id', dishId)
         .order('created_at', { ascending: false });
 
-      // If foreign key relationship doesn't work, try manual join
-      if (error && error.code === 'PGRST200') {
-        console.log('Foreign key relationship not found, trying manual join...');
-        
-        // First get reviews
-        const { data: reviewsOnly, error: reviewsError } = await supabase
-          .from('reviews')
-          .select('*')
-          .eq('dish_id', dishId)
-          .order('created_at', { ascending: false });
-
-        if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
-          return;
-        }
-
-        // Get unique user IDs
-        const userIds = [...new Set(reviewsOnly?.map(r => r.user_id) || [])];
-        
-        // Get user names
-        const { data: usersData, error: usersError } = await supabase
-          .from('USERS')
-          .select('id, name')
-          .in('id', userIds);
-
-        if (usersError) {
-          console.error('Error fetching users:', usersError);
-          return;
-        }
-
-        // Combine the data
-        reviewsData = reviewsOnly?.map(review => ({
-          ...review,
-          USERS: usersData?.filter(user => user.id === review.user_id) || []
-        })) || [];
-      } else if (error) {
-        console.error('Error fetching reviews:', error);
+      if (reviewsError) {
+        console.error('Error fetching reviews:', reviewsError);
         return;
       }
 
-      const formattedReviews: Review[] = (reviewsData || []).map(review => ({
+      if (!reviewsData || reviewsData.length === 0) {
+        // No reviews found
+        setSelectedDish(prev => prev ? { ...prev, reviews: [] } : null);
+        return;
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(reviewsData.map(r => r.user_id))];
+      
+      // Get user names - try both 'USERS' and 'users' table names
+      let usersData;
+      let usersError;
+      
+      // Try with 'USERS' first
+      const { data: usersDataCaps, error: usersErrorCaps } = await supabase
+        .from('USERS')
+        .select('id, name')
+        .in('id', userIds);
+
+      if (usersErrorCaps) {
+        // Try with 'users' (lowercase)
+        const { data: usersDataLower, error: usersErrorLower } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', userIds);
+        
+        usersData = usersDataLower;
+        usersError = usersErrorLower;
+      } else {
+        usersData = usersDataCaps;
+        usersError = usersErrorCaps;
+      }
+
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        // Still show reviews but with anonymous usernames
+        usersData = [];
+      }
+
+      // Combine the data
+      const formattedReviews: Review[] = reviewsData.map(review => ({
         id: review.id,
         rating: review.rating,
         comment: review.comment,
         created_at: review.created_at,
-        userName: review.USERS?.[0]?.name || 'Anonymous',
+        userName: usersData?.find(user => user.id === review.user_id)?.name || 'Anonymous',
       }));
 
       // Update the selected dish with the fetched reviews
