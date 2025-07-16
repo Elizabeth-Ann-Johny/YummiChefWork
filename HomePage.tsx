@@ -37,7 +37,12 @@ type DatabaseDish = {
     USERS?: {
       name: string;
     };
-  };
+  } | {
+    average_rating?: number;
+    USERS?: {
+      name: string;
+    };
+  }[];
 };
 
 type DatabaseReview = {
@@ -270,12 +275,17 @@ export default function HomePage() {
               cuisine: d.cuisine || 'unknown',
               ingredients: d.ingredients || [],
               dietaryType: d.dietary_type || 'vegetarian',
-                                            chef: d.CHEFS?.USERS
-                 ? {
-                     name: d.CHEFS.USERS.name,
-                     average_rating: d.CHEFS.average_rating ?? 0,
-                   }
-                 : undefined,
+              chef: d.CHEFS && Array.isArray(d.CHEFS) && d.CHEFS[0]?.USERS
+                ? {
+                    name: d.CHEFS[0].USERS.name,
+                    average_rating: d.CHEFS[0].average_rating ?? 0,
+                  }
+                : d.CHEFS && !Array.isArray(d.CHEFS) && d.CHEFS.USERS
+                ? {
+                    name: d.CHEFS.USERS.name,
+                    average_rating: d.CHEFS.average_rating ?? 0,
+                  }
+                : undefined,
                reviews: [], // No reviews in dish cards
                allergens: d.alergens || '',
                isFavorite: favoriteIds.includes(String(d.id)),

@@ -212,7 +212,12 @@ export default function Favorites() {
           dietaryType: dish.dietary_type || 'vegetarian',
           allergens: dish.alergens || '',
           isFavorite: true,
-          chef: dish.CHEFS?.USERS
+          chef: dish.CHEFS && Array.isArray(dish.CHEFS) && dish.CHEFS[0]?.USERS
+            ? {
+                name: dish.CHEFS[0].USERS.name,
+                average_rating: dish.CHEFS[0].average_rating ?? 0,
+              }
+            : dish.CHEFS && !Array.isArray(dish.CHEFS) && dish.CHEFS.USERS
             ? {
                 name: dish.CHEFS.USERS.name,
                 average_rating: dish.CHEFS.average_rating ?? 0,
