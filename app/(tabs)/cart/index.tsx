@@ -30,6 +30,7 @@ const theme = {
 export default function Cart() {
   const {
     cartItems,
+    loading,
     removeFromCart,
     updateQuantity,
     getFoodCost,
@@ -44,13 +45,13 @@ export default function Cart() {
   const [isTipConfirmed, setIsTipConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleAddTip = () => {
+  const handleAddTip = async () => {
     const tipValue = parseFloat(tipInput);
     if (isNaN(tipValue) || tipValue < 0) {
       Alert.alert('Invalid Tip', 'Please enter a valid tip amount');
       return;
     }
-    setTipAmount(tipValue);
+    await setTipAmount(tipValue);
     setIsTipConfirmed(true);
     Alert.alert('Tip Added', `₹${tipValue} tip has been added to your order`);
   };
@@ -90,6 +91,7 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.quantityButton}
           onPress={() => updateQuantity(item.id, item.quantity - 1)}
+          disabled={loading}
         >
           <MaterialIcons name="remove" size={20} color={theme.COLORS.text} />
         </TouchableOpacity>
@@ -97,6 +99,7 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.quantityButton}
           onPress={() => updateQuantity(item.id, item.quantity + 1)}
+          disabled={loading}
         >
           <MaterialIcons name="add" size={20} color={theme.COLORS.text} />
         </TouchableOpacity>
@@ -190,13 +193,17 @@ export default function Cart() {
                 isTipConfirmed && styles.tipButtonConfirmed
               ]}
               onPress={handleAddTip}
-              disabled={isTipConfirmed}
+              disabled={isTipConfirmed || loading}
             >
-              <MaterialIcons 
-                name={isTipConfirmed ? "check" : "check"} 
-                size={20} 
-                color={isTipConfirmed ? "#4CAF50" : theme.COLORS.text} 
-              />
+              {loading ? (
+                <ActivityIndicator size="small" color={theme.COLORS.text} />
+              ) : (
+                <MaterialIcons 
+                  name={isTipConfirmed ? "check" : "check"} 
+                  size={20} 
+                  color={isTipConfirmed ? "#4CAF50" : theme.COLORS.text} 
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -205,7 +212,7 @@ export default function Cart() {
         <TouchableOpacity 
           style={styles.checkoutButton}
           onPress={handlePlaceOrder}
-          disabled={loading}
+          disabled={loading || cartItems.length === 0}
         >
           {loading ? (
             <ActivityIndicator size="small" color={theme.COLORS.primary} />

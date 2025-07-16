@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useCart } from '../../../contexts/CartContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const theme = {
   COLORS: {
@@ -17,10 +18,22 @@ const theme = {
 
 export default function Profile() {
   const { clearCart, getItemCount } = useCart();
+  const { user, profile, signOut } = useAuth();
 
-  const handleClearCart = () => {
-    clearCart();
+  const handleClearCart = async () => {
+    await clearCart();
     alert('Cart cleared!');
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign Out', onPress: signOut, style: 'destructive' },
+      ]
+    );
   };
 
   return (
@@ -31,11 +44,15 @@ export default function Profile() {
       </View>
       
       <View style={styles.content}>
-        <Text style={styles.title}>Profile Screen</Text>
-        <Text style={styles.subtitle}>
-          This is a placeholder profile screen. You can add user information, 
-          settings, order history, and other profile features here.
-        </Text>
+        <Text style={styles.title}>Profile</Text>
+        
+        <View style={styles.userInfoContainer}>
+          <MaterialIcons name="person" size={24} color={theme.COLORS.accent} />
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{profile?.full_name || 'User'}</Text>
+            <Text style={styles.userEmail}>{user?.email}</Text>
+          </View>
+        </View>
         
         <View style={styles.cartInfoContainer}>
           <MaterialIcons name="shopping-cart" size={24} color={theme.COLORS.accent} />
@@ -50,6 +67,14 @@ export default function Profile() {
         >
           <MaterialIcons name="clear" size={20} color={theme.COLORS.primary} />
           <Text style={styles.clearButtonText}>Clear Cart</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.signOutButton}
+          onPress={handleSignOut}
+        >
+          <MaterialIcons name="logout" size={20} color={theme.COLORS.accent} />
+          <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -95,6 +120,33 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 40,
   },
+  userInfoContainer: {
+    backgroundColor: theme.COLORS.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  userInfo: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.COLORS.text,
+    marginBottom: 5,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#666',
+  },
   cartInfoContainer: {
     backgroundColor: theme.COLORS.white,
     flexDirection: 'row',
@@ -125,6 +177,23 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     color: theme.COLORS.primary,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  signOutButton: {
+    backgroundColor: theme.COLORS.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: theme.COLORS.accent,
+  },
+  signOutButtonText: {
+    color: theme.COLORS.accent,
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,

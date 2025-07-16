@@ -27,8 +27,8 @@ export default function Home() {
     rating: 4.5,
   };
 
-  const handleAddToCart = () => {
-    addToCart(sampleDish);
+  const handleAddToCart = async () => {
+    await addToCart(sampleDish);
     alert('Item added to cart!');
   };
 
