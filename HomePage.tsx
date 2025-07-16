@@ -36,12 +36,16 @@ type DatabaseDish = {
     average_rating?: number;
     USERS?: {
       name: string;
-    };
+    } | {
+      name: string;
+    }[];
   } | {
     average_rating?: number;
     USERS?: {
       name: string;
-    };
+    } | {
+      name: string;
+    }[];
   }[];
 };
 
@@ -99,6 +103,39 @@ export default function HomePage() {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
+
+  // Helper function to safely extract chef name from nested structure
+  const getChefName = (chefs: any): string | undefined => {
+    if (!chefs) return undefined;
+    
+    // Handle array of chefs
+    if (Array.isArray(chefs) && chefs[0]) {
+      const chef = chefs[0];
+      if (chef.USERS) {
+        return Array.isArray(chef.USERS) ? chef.USERS[0]?.name : chef.USERS?.name;
+      }
+    }
+    
+    // Handle single chef object
+    if (chefs.USERS) {
+      return Array.isArray(chefs.USERS) ? chefs.USERS[0]?.name : chefs.USERS?.name;
+    }
+    
+    return undefined;
+  };
+
+  // Helper function to safely extract chef rating
+  const getChefRating = (chefs: any): number => {
+    if (!chefs) return 0;
+    
+    // Handle array of chefs
+    if (Array.isArray(chefs) && chefs[0]) {
+      return chefs[0].average_rating ?? 0;
+    }
+    
+    // Handle single chef object
+    return chefs.average_rating ?? 0;
+  };
 
   const [filters, setFilters] = useState({
     cuisine: '',
@@ -275,15 +312,10 @@ export default function HomePage() {
               cuisine: d.cuisine || 'unknown',
               ingredients: d.ingredients || [],
               dietaryType: d.dietary_type || 'vegetarian',
-              chef: d.CHEFS && Array.isArray(d.CHEFS) && d.CHEFS[0]?.USERS
+              chef: d.CHEFS && getChefName(d.CHEFS)
                 ? {
-                    name: d.CHEFS[0].USERS.name,
-                    average_rating: d.CHEFS[0].average_rating ?? 0,
-                  }
-                : d.CHEFS && !Array.isArray(d.CHEFS) && d.CHEFS.USERS
-                ? {
-                    name: d.CHEFS.USERS.name,
-                    average_rating: d.CHEFS.average_rating ?? 0,
+                    name: getChefName(d.CHEFS)!,
+                    average_rating: getChefRating(d.CHEFS),
                   }
                 : undefined,
                reviews: [], // No reviews in dish cards

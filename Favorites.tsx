@@ -52,6 +52,39 @@ export default function Favorites() {
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
 
+  // Helper function to safely extract chef name from nested structure
+  const getChefName = (chefs: any): string | undefined => {
+    if (!chefs) return undefined;
+    
+    // Handle array of chefs
+    if (Array.isArray(chefs) && chefs[0]) {
+      const chef = chefs[0];
+      if (chef.USERS) {
+        return Array.isArray(chef.USERS) ? chef.USERS[0]?.name : chef.USERS?.name;
+      }
+    }
+    
+    // Handle single chef object
+    if (chefs.USERS) {
+      return Array.isArray(chefs.USERS) ? chefs.USERS[0]?.name : chefs.USERS?.name;
+    }
+    
+    return undefined;
+  };
+
+  // Helper function to safely extract chef rating
+  const getChefRating = (chefs: any): number => {
+    if (!chefs) return 0;
+    
+    // Handle array of chefs
+    if (Array.isArray(chefs) && chefs[0]) {
+      return chefs[0].average_rating ?? 0;
+    }
+    
+    // Handle single chef object
+    return chefs.average_rating ?? 0;
+  };
+
   useEffect(() => {
     fetchFavorites();
   }, []);
@@ -212,15 +245,10 @@ export default function Favorites() {
           dietaryType: dish.dietary_type || 'vegetarian',
           allergens: dish.alergens || '',
           isFavorite: true,
-          chef: dish.CHEFS && Array.isArray(dish.CHEFS) && dish.CHEFS[0]?.USERS
+          chef: dish.CHEFS && getChefName(dish.CHEFS)
             ? {
-                name: dish.CHEFS[0].USERS.name,
-                average_rating: dish.CHEFS[0].average_rating ?? 0,
-              }
-            : dish.CHEFS && !Array.isArray(dish.CHEFS) && dish.CHEFS.USERS
-            ? {
-                name: dish.CHEFS.USERS.name,
-                average_rating: dish.CHEFS.average_rating ?? 0,
+                name: getChefName(dish.CHEFS)!,
+                average_rating: getChefRating(dish.CHEFS),
               }
             : undefined,
           reviews: [],
