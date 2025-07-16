@@ -30,6 +30,7 @@ type Dish = {
   dietaryType?: string;
   allergens?: string;
   isFavorite?: boolean;
+  reviews?: Review[];
 };
 
 interface Review {
