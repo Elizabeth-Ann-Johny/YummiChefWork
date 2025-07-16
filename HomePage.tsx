@@ -695,6 +695,9 @@ export default function HomePage() {
         <TouchableOpacity style={homePageStyles.controlButton} onPress={() => setFilterModalVisible(true)}>
           <Text style={homePageStyles.controlButtonText}>Filter</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={homePageStyles.controlButton} onPress={() => setIsGridView(!isGridView)}>
+          <Text style={homePageStyles.controlButtonText}>List</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Dishes List */}
